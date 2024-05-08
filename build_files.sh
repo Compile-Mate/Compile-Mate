@@ -13,7 +13,7 @@ fi
 
 # Activate the virtual environment
 echo "Activating virtual environment..."
-source myenv/bin/activate
+source myenv/scripts/activate
 if [ $? -ne 0 ]; then
     echo "Failed to activate virtual environment. Exiting."
     exit 1
