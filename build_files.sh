@@ -3,15 +3,15 @@
 # Print a message indicating that the script is starting
 echo "Starting build process..."
 
-# Install dependencies from requirements.txt
+# Install dependencies from requirements.txt using Python 3.9
 echo "Installing dependencies..."
-pip install -r requirements.txt
+python3.9 -m pip install -r requirements.txt
 if [ $? -ne 0 ]; then
     echo "Failed to install dependencies. Exiting."
     exit 1
 fi
 
-# Run collectstatic command
+# Run collectstatic command using Python 3.9
 echo "Collecting static files..."
 python3.9 manage.py collectstatic
 if [ $? -ne 0 ]; then
