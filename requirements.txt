@@ -24,7 +24,7 @@ docker==5.0.3
 docker-compose==1.29.2
 dockerpty==0.4.1
 docopt==0.6.2
-Envelopes==0.4.4
+Envelopes==0.4
 filelock==3.3.1
 Flask==2.0.2
 funcparserlib==0.3.6
