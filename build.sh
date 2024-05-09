@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Change to the directory where this script resides
+cd "$(dirname "$0")"
+
 # Function to check if Django server is already running on port 8000
 check_server_running() {
     if lsof -Pi :8000 -sTCP:LISTEN -t >/dev/null ; then
@@ -6,69 +10,52 @@ check_server_running() {
         lsof -t -i :8000 | xargs kill -9
     fi
 }
-# Function to activate the virtual environment and run Django server
-run_server() {
-    # Change directory to your Django project folder
-    # Load environment variables from .env file
-    source .env
-    # Activate the virtual environment
-    source venv/bin/activate
+
+# Function to activate the virtual environment
+activate_virtualenv() {
+    # Replace 'path/to/your/venv/bin/activate' with the path to your virtual environment activation script
+    source venv/scripts/activate
+}
+
+# Function to install dependencies
+install_dependencies() {
+    activate_virtualenv
+    pip install -r requirements.txt
+}
+
+# Function to run flake8 for linting
+run_flake8() {
+    activate_virtualenv
     flake8
+}
+
+# Function to run Django server
+run_server() {
+    activate_virtualenv
+    run_flake8
     python manage.py runserver
 }
-run_packages() {
-    # Change directory to your Django project folder
-    # Load environment variables from .env file
-    source .env
-    # Activate the virtual environment
-    source venv/bin/activate
-    # Install packages
-    pip install -r requirements.txt
-    # Freeze installed packages to requirements.txt
-    pip freeze > requirements.txt
-    # Run flake8
-    flake8
-    # Run migrations
-    python manage.py migrate
-}
-run_tests() {
-    # Change directory to your Django project folder
-    # Load environment variables from .env file
-    source .env
-    # Activate the virtual environment
-    source venv/bin/activate
-    # Run flake8
-    flake8
-    # Run tests
-    python manage.py test
-}
-# Function to run migrations
+
+# Function to run Django migrations
 run_migrations() {
-    # Change directory to your Django project folder
-    # Load environment variables from .env file
-    source .env
-    # Activate the virtual environment
-    source venv/bin/activate
-    
-    # Run flake8
-    flake8
-
-    # Run migrate
+    activate_virtualenv
+    run_flake8
     python manage.py migrate
 }
-# Function to make migrations
-make_migrations() {
-    # Change directory to your Django project folder
-    # Load environment variables from .env file
-    source .env
-    # Activate the virtual environment
-    source venv/bin/activate
-    flake8
 
-    # Run makemigrations
+# Function to generate Django migration files
+make_migrations() {
+    activate_virtualenv
+    run_flake8
     python manage.py makemigrations
 }
 
+# Function to run Django tests
+run_tests() {
+    activate_virtualenv
+    run_flake8
+    python manage.py test
+}
 
 # Main script logic
 case "$1" in
@@ -86,7 +73,7 @@ case "$1" in
         run_tests
         ;;
     install)
-        run_packages
+        install_dependencies
         ;;
     *)
         echo "Invalid command. Usage: ./build.sh [runserver|migrate|makemigrations|install|test]"
