@@ -78,8 +78,14 @@ WSGI_APPLICATION = 'Compile-Mate.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'USERNAME': 'compile_mate_user',
+        'PASSWORD': 'vQU7X9xSnvW35tz4qGSbVcKwosriNBhj',
+        'HOST': 'dpg-cou6660l6cac73cclq20-a',
+        'PORT': '5432',
+        'Internal Database URL': 'postgres://compile_mate_user:vQU7X9xSnvW35tz4qGSbVcKwosriNBhj@dpg-cou6660l6cac73cclq20-a/compile_mate',
+        'External Database URL': 'postgres://compile_mate_user:vQU7X9xSnvW35tz4qGSbVcKwosriNBhj@dpg-cou6660l6cac73cclq20-a.oregon-postgres.render.com/compile_mate',
+        'PSQL Command': 'PGPASSWORD=vQU7X9xSnvW35tz4qGSbVcKwosriNBhj psql -h dpg-cou6660l6cac73cclq20-a.oregon-postgres.render.com -U compile_mate_user compile_mate'
     }
 }
 
@@ -124,6 +130,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+STATICFILES_DIRS = os.path.join(BASE_DIR, 'static'),
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
 
 # Added Manually
 
