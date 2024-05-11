@@ -24,6 +24,7 @@ urlpatterns = [
     path("home/<str:user_name>",views.home, name="home_user"),
     path("signup",views.signup,name="signup"),
     path("leaderboard/",views.leaderboard, name="leaderboard"),
+    path('codeconnect/', views.codeconnect_redirect, name='codeconnect_redirect'),
     path("problems/", views.problems, name="problems"),  # Add this line for /problems/ endpoint
     path("problems/<str:user_name>/", views.problems, name="problems_user"),  # Update this line as per your requirement
     path("problem_search/<str:user_name>",views.problem_search,name="search_problem"),
