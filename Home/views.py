@@ -35,17 +35,20 @@ def signin(request):
 def signup(request):
     if request.method == "POST":
         name = request.POST.get('name')
+        username = request.POST.get('username')
         email = request.POST.get('email')
         password1 = request.POST.get('password1')
         password2 = request.POST.get('password2')
         if password1 != password2 and password1 is not None:
             messages.success(request,'Passwords don\'t match.')
         else:
-            user = User(name=name,email=email,password=password1)
+            user = User(name=name,username=username,email=email,password=password1)
             user.save()
             messages.success(request,'Your Account has been created.')
 
     return render(request,'signup.html')
+
+# views.py
 
 def problems(request, user_name=None):
     user = None
@@ -61,6 +64,7 @@ def problems(request, user_name=None):
     problems = Problem.objects.all()
     types = Problem.objects.values('type').distinct()
     return render(request, 'problems.html', {'user': user, 'problems': problems, 'types': types, 'rank': rank})
+
 
 
 
