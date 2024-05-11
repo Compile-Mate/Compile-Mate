@@ -1,5 +1,6 @@
 from time import time
 from unicodedata import name
+from django.shortcuts import redirect
 from django.shortcuts import render, HttpResponse
 from Home.models import Problem, Submission, TestCases, User
 from django.contrib import messages
@@ -31,7 +32,10 @@ def signin(request):
             messages.error(request,'Incorrect Email or Password') 
     
     return render(request,'startpage.html')
-
+    
+def codeconnect_redirect(request):
+    return redirect('https://codeconnect.vercel.app/')
+    
 def signup(request):
     if request.method == "POST":
         name = request.POST.get('name')
