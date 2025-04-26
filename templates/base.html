@@ -261,6 +261,7 @@
         text-align: center;
         width: 100%;
         max-width: 600px;
+        z-index: -1;
       }
 
       .quote {
@@ -268,6 +269,7 @@
         position: absolute;
         width: 100%;
         transition: opacity 0.5s ease-in-out;
+        padding: 10px 0;
       }
 
       .quote.active {
@@ -279,6 +281,12 @@
           position: static;
           transform: none;
           margin: 1rem 0;
+          z-index: 1;
+        }
+
+        .quote {
+          position: relative;
+          margin-bottom: 10px;
         }
       }
     </style>
