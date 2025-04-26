@@ -25,9 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-+75==tb+f#=vh8r+xt2+r7%q(5y5vugozm)xc8_ou$p3t#_q4e'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['compile-mate.onrender.com','now.sh','127.0.0.1','localhost']
+ALLOWED_HOSTS = ['compile-mate.onrender.com','now.sh','127.0.0.1','localhost', 'CompileMate.onrender.com']
 
 
 # Application definition
