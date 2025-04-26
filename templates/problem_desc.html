@@ -16,6 +16,19 @@
   </li>
 {% endblock account %}
 
+{% block problems %}
+<li class="nav-item">
+  <a class="nav-link" href="/leaderboard">
+    <i class="fas fa-list-ol me-1"></i>Leaderboard
+  </a>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="/problems/{{ user.username }}">
+    <i class="fas fa-code me-1"></i>Problems
+  </a>
+</li>
+{% endblock problems %}
+
 {% block body %}
 {% csrf_token %}
 <div class="leetcode-app">
@@ -63,7 +76,7 @@
           <!-- Problem Statement -->
           <div class="problem-statement">
             <div class="statement-area">
-              {{ problem.statement|safe }}
+              {{ problem.statement|safe|linebreaks }}
             </div>
           </div>
 
@@ -71,7 +84,7 @@
           <div class="task-area">
             <h2 class="section-title">Your Task</h2>
             <div class="task-content">
-              {{ problem.task|safe }}
+              {{ problem.task|safe|linebreaks }}
             </div>
           </div>
 
@@ -88,13 +101,13 @@
                 <ul class="parameter-list">
                   {% for param in problem.parameters %}
                   <li>
-                    <code>{{ param.name }}</code>: {{ param.description }}
+                    <code>{{ param.name }}</code>: {{ param.description|safe|linebreaks }}
                   </li>
                   {% endfor %}
                 </ul>
                 <h3>Returns:</h3>
                 <ul class="return-list">
-                  <li>{{ problem.return_description }}</li>
+                  <li>{{ problem.return_description|safe|linebreaks }}</li>
                 </ul>
               </div>
             </div>
