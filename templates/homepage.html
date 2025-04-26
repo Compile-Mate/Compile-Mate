@@ -3,70 +3,451 @@
 {% block title %}Home{% endblock title %}
 
 {% block account %}
-<li class="nav-item dropdown">
-  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-      {{ user.name }}
-  </a>
-  <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-    <li><a class="dropdown-item" href="#">Rank : {{ rank }}</a></li>
-    <li><a class="dropdown-item" href="/submissions/{{ user.username }}">My Submissions</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item" href="/">Logout</a></li>
-  </ul>
-</li>
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+      <i class="fas fa-user-circle me-1"></i>{{ user.name }}
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end">
+      <li><a class="dropdown-item" href="#"><i class="fas fa-trophy me-2"></i>Rank: {{ rank }}</a></li>
+      <li><a class="dropdown-item" href="/submissions/{{ user.username }}"><i class="fas fa-history me-2"></i>My Submissions</a></li>
+      <li><hr class="dropdown-divider"></li>
+      <li><a class="dropdown-item" href="/"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+    </ul>
+  </li>
 {% endblock account %}
 
 {% block problems %}
-<li class="nav-item">
-  <a class="nav-link" href="/problems/{{ user.username }}">Problems</a>
-</li>
+  <li class="nav-item">
+    <a class="nav-link" href="/problems/{{ user.username }}">
+      <i class="fas fa-code me-1"></i>Problems
+    </a>
+  </li>
 {% endblock problems %}
-
 
 {% block navbar %}
   <form class="d-flex" method="post" action="/problem_search/{{ user.username }}">
     {% csrf_token %}
-    <input class="form-control me-2" type="search" name="search" placeholder="Search" aria-label="Search">
-    <button class="btn btn-outline-success" type="submit">Search</button>
+    <div class="input-group">
+      <span class="input-group-text bg-dark border-secondary">
+        <i class="fas fa-search text-light"></i>
+      </span>
+      <input class="form-control" type="search" name="search" placeholder="Search problems..." aria-label="Search">
+    </div>
+    <button class="btn btn-outline-success ms-2" type="submit">Search</button>
   </form>
 {% endblock navbar %}
 
-
 {% block body %}
-<div id="carouselExampleControls" class="carousel slide container-fluid my-0 px-0" data-bs-ride="carousel">
-  <div class="carousel-inner">
-    <div class="carousel-item active">
-      <img src="/static/carousel-1.jpg" class="d-block w-100" alt="...">
-    </div>
-    <div class="carousel-item">
-      <img src="/static/carousel-2.jpg" class="d-block w-100" alt="...">
-    </div>
-    <div class="carousel-item">
-      <img src="/static/carousel-3.jpg" class="d-block w-100" alt="...">
+<style>
+  /* Hero Section */
+  .hero-section {
+    background: var(--secondary-bg);
+    border-bottom: 1px solid var(--border-color);
+    padding: 2rem 0;
+  }
+
+  .hero-content {
+    padding: 2rem;
+  }
+
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .stat-card {
+    background: var(--primary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.2s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .stat-card i {
+    color: var(--accent-color);
+    margin-bottom: 1rem;
+  }
+
+  .stat-card h3 {
+    color: var(--text-primary);
+    margin: 0.5rem 0;
+    font-size: 1.5rem;
+  }
+
+  .stat-card p {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  /* Code Preview */
+  .code-preview {
+    background: var(--primary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 2rem;
+  }
+
+  .editor-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    background: var(--secondary-bg);
+    border-bottom: 1px solid var(--border-color);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .editor-tab {
+    padding: 8px 16px;
+    background: var(--primary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+
+  .editor-tab.active {
+    background: var(--secondary-bg);
+    border-bottom: 2px solid var(--accent-color);
+    color: var(--text-primary);
+  }
+
+  pre {
+    padding: 1rem;
+    margin: 0;
+    color: var(--text-primary);
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    overflow-x: auto;
+  }
+
+  /* Categories Section */
+  .categories-section {
+    padding: 3rem 0;
+  }
+
+  .section-title {
+    color: var(--text-primary);
+    font-family: 'Fira Code', monospace;
+    font-weight: 600;
+    margin-bottom: 2rem;
+  }
+
+  .category-card {
+    background: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    height: 100%;
+    transition: transform 0.2s;
+  }
+
+  .category-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .category-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--primary-bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: var(--accent-color);
+  }
+
+  .category-card h3 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+  }
+
+  .category-card p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  /* Activity Section */
+  .activity-section {
+    padding: 3rem 0;
+  }
+
+  .activity-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .activity-item {
+    display: flex;
+    gap: 1rem;
+    background: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  .activity-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--primary-bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-color);
+    flex-shrink: 0;
+  }
+
+  .activity-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .activity-content h4 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .activity-content p {
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .activity-time {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+  }
+
+  /* Responsive Styles */
+  @media (max-width: 991.98px) {
+    .hero-content {
+      padding: 1.5rem;
+    }
+
+    .hero-stats {
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+    }
+
+    .stat-card {
+      padding: 1rem;
+    }
+
+    .stat-card h3 {
+      font-size: 1.25rem;
+    }
+
+    .category-card {
+      padding: 1.5rem;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .hero-section {
+      padding: 1.5rem 0;
+    }
+
+    .hero-content {
+      padding: 1rem;
+    }
+
+    .code-preview {
+      margin-top: 1.5rem;
+    }
+
+    .categories-section,
+    .activity-section {
+      padding: 2rem 0;
+    }
+
+    .section-title {
+      margin-bottom: 1.5rem;
+    }
+
+    .category-icon {
+      width: 50px;
+      height: 50px;
+    }
+
+    .category-card h3 {
+      font-size: 1.1rem;
+    }
+  }
+
+  @media (max-width: 575.98px) {
+    .hero-stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stat-card {
+      padding: 0.75rem;
+    }
+
+    .stat-card i {
+      font-size: 1.5rem;
+    }
+
+    .stat-card h3 {
+      font-size: 1.1rem;
+    }
+
+    .editor-tab {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+    }
+
+    pre {
+      font-size: 0.8rem;
+      padding: 0.75rem;
+    }
+
+    .activity-item {
+      padding: 0.75rem;
+    }
+
+    .activity-icon {
+      width: 32px;
+      height: 32px;
+    }
+
+    .activity-content h4 {
+      font-size: 0.9rem;
+    }
+
+    .activity-content p {
+      font-size: 0.8rem;
+    }
+  }
+</style>
+
+<div class="container-fluid">
+  <!-- Hero Section -->
+  <div class="hero-section">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <div class="hero-content">
+          <h1 class="display-4 mb-4" style="color: var(--accent-color); font-family: 'Fira Code', monospace;">
+            Welcome, {{ user.name }}!
+          </h1>
+          <p class="lead mb-4" style="color: var(--text-secondary);">
+            Ready to solve some challenging problems today?
+          </p>
+          <div class="hero-stats">
+            <div class="stat-card">
+              <i class="fas fa-code-branch fa-2x"></i>
+              <h3>{{ problems_solved }}</h3>
+              <p>Problems Solved</p>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-trophy fa-2x"></i>
+              <h3>#{{ rank }}</h3>
+              <p>Global Rank</p>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-fire fa-2x"></i>
+              <h3>{{ streak }}</h3>
+              <p>Day Streak</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="code-preview">
+          <div class="editor-tabs">
+            <span class="editor-tab active">recent.py</span>
+            <span class="editor-tab">stats.py</span>
+          </div>
+          <pre><code class="language-python">def solve_problem():
+    # Your recent solution
+    n = int(input())
+    arr = list(map(int, input().split()))
+    
+    # Efficient solution
+    result = 0
+    for num in arr:
+        result ^= num
+    
+    return result
+
+if __name__ == "__main__":
+    print(solve_problem())</code></pre>
+        </div>
+      </div>
     </div>
   </div>
-  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
-    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Previous</span>
-  </button>
-  <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
-    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Next</span>
-  </button>
-</div>
-<div class="col-lg-8 mx-auto p-3 py-md-5">
 
+  <!-- Problem Categories -->
+  <div class="categories-section">
+    <h2 class="section-title">
+      <i class="fas fa-folder-open me-2"></i>Problem Categories
+    </h2>
+    <div class="row g-4">
+      {% for item in types %}
+      <div class="col-md-6 col-lg-4">
+        <div class="category-card">
+          <div class="category-icon">
+            <i class="fas fa-code fa-2x"></i>
+          </div>
+          <h3>{{ item.type }}</h3>
+          <p>{{ item.description }}</p>
+          <a href="/problems/{{ user.username }}/type/{{ item.type }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-right me-1"></i>View Problems
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
 
-<div class="container marketing">
-
-  <div class="row">
-    {% for item in types %}
-
-    
-
-    {% endfor %}
-
-</div>
+  <!-- Recent Activity -->
+  <div class="activity-section">
+    <h2 class="section-title">
+      <i class="fas fa-history me-2"></i>Recent Activity
+    </h2>
+    <div class="activity-timeline">
+      {% for activity in recent_activities %}
+      <div class="activity-item">
+        <div class="activity-icon">
+          {% if activity.type == 'submission' %}
+            <i class="fas fa-code"></i>
+          {% elif activity.type == 'achievement' %}
+            <i class="fas fa-trophy"></i>
+          {% else %}
+            <i class="fas fa-star"></i>
+          {% endif %}
+        </div>
+        <div class="activity-content">
+          <h4>{{ activity.title }}</h4>
+          <p>{{ activity.description }}</p>
+          <span class="activity-time">{{ activity.time }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
 </div>
 {% endblock body %}
 

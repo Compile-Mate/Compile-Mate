@@ -23,6 +23,7 @@ urlpatterns = [
     path("home/", views.start, name="home"),
     path("home/<str:user_name>", views.home, name="home_user"),
     path("signup", views.signup, name="signup"),
+    path("logout", views.logout, name="logout"),
     path("leaderboard/", views.leaderboard, name="leaderboard"),
     path("problems/", views.problems, name="problems"),  # Add this line for /problems/ endpoint
     path("problems/<str:user_name>/", views.problems, name="problems_user"),  # Update this line as per your requirement
@@ -32,4 +33,6 @@ urlpatterns = [
     path("problem_desc/<str:user_name>/<int:id>", views.problem_description, name="problem_description"),
     path("submit_code/<str:user_name>/<int:id>", views.submit, name="problem_description"),
     path("submissions/<str:user_name>", views.submissions, name="my_submissions"),
+    path("run_code", views.run_code, name="run_code"),
+    path("submit/<str:user_name>/<int:problem_id>", views.submit_code, name="submit_code"),
 ]

@@ -1,47 +1,242 @@
 {% extends 'base.html' %}
 
-{% block title %}Sign Up{% endblock title %}
+{% block title %}Sign Up - Compile-Mate{% endblock %}
 
 {% block navbar %}
-
-<form method="get" action="/signin" class="d-flex">
-  <input class="form-control me-2 my-2" type="email" id="email" name="email" placeholder="Email" aria-label="Email" style="width: 164px;">
-  <input class="form-control me-2 my-2" type="password" id="password" name="password" placeholder="Password" aria-label="Password" style="width: 164px;">
-  <button class="btn btn-outline-success mx-1 my-2 px-1 py-2" type="submit" style="width: 80px;">Sign in</button>
+<form method="get" action="/signin" class="d-flex align-items-center">
+  <div class="input-group me-2">
+    <span class="input-group-text bg-dark border-secondary">
+      <i class="fas fa-envelope text-light"></i>
+    </span>
+    <input class="form-control" type="email" id="email" name="email" placeholder="Email" aria-label="Email">
+  </div>
+  <div class="input-group me-2">
+    <span class="input-group-text bg-dark border-secondary">
+      <i class="fas fa-lock text-light"></i>
+    </span>
+    <input class="form-control" type="password" id="password" name="password" placeholder="Password" aria-label="Password">
+  </div>
+  <button class="btn btn-outline-success px-3" type="submit">
+    <i class="fas fa-sign-in-alt me-1"></i>Sign in
+  </button>
 </form>
-  
 {% endblock navbar %}
 
-
 {% block body %}
+<div class="signup-container">
+    <div class="signup-content">
+        <div class="row">
+            <!-- Left Side: Welcome Content -->
+            <div class="col-lg-6 welcome-section">
+                <div class="welcome-content animate__animated animate__fadeInLeft">
+                    <h1>Join Compile-Mate</h1>
+                    <p>Start your coding journey with us and become part of a growing community of programmers</p>
+                    <div class="features-list">
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Access to 500+ coding problems</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Real-time code compilation</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Performance tracking & analytics</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Join coding competitions</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-  <div class = "container mx-0 px-0">
-    <img src="/static/single-2.jpg" class="d-block w-100 h-100" height="700" style="position:absolute;" >
-    <form method="post" action="/signup" style="position: fixed;color: white;top: 232px;left: 850px">
-      {% csrf_token %}
-      <div class="row mb-3">
-          <label for="username" class="col-sm-2 col-form-label" style="width: 160px;">Username</label>
-          <input type="text" class="form-control" id="username" name="username" style="width: 350px;">
-      </div>
-      <div class="row mb-3">
-          <label for="name" class="col-sm-2 col-form-label" style="width: 160px;">Name</label>
-          <input type="text" class="form-control" id="name" name="name" style="width: 350px;">
-      </div>
-      <div class="row mb-3">
-          <label for="email" class="col-sm-2 col-form-label" style="width: 160px;">Email</label>
-          <input type="email" class="form-control" id="email" name="email" style="width: 350px;">
-      </div>
-      <div class="row mb-3">
-          <label for="password" class="col-sm-2 col-form-label" style="width: 160px;">Password</label>
-          <input type="password" class="form-control" id="password" name="password1" style="width: 350px;">
-      </div>
-      <div class="row mb-3">
-          <label for="password" class="col-sm-2 col-form-label" style="width: 160px;">Confirm Password</label>
-          <input type="password" class="form-control" id="password" name="password2" style="width: 350px;">
-      </div>
-      <button type="submit" class="btn btn-warning my-4 px-5" style="position: fixed;border-radius: 20px;top: 472px;left: 1035px" >Sign up</button>
-  </form>
-      
-  </div>
+            <!-- Right Side: Sign Up Form -->
+            <div class="col-lg-6">
+                <div class="signup-form-container animate__animated animate__fadeInRight">
+                    <form method="POST" class="signup-form">
+                        {% csrf_token %}
+                        <h2>Create Account</h2>
+                        
+                        {% if messages %}
+                        <div class="messages">
+                            {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
 
-{% endblock body %}
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="name" name="name" placeholder="Full Name" required>
+                            <label for="name">Full Name</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
+                            <label for="username">Username</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
+                            <label for="email">Email address</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="password" class="form-control" id="password1" name="password1" placeholder="Password" required>
+                            <label for="password1">Password</label>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="password" class="form-control" id="password2" name="password2" placeholder="Confirm Password" required>
+                            <label for="password2">Confirm Password</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mb-3">Create Account</button>
+
+                        <div class="text-center">
+                            <span>Already have an account? </span>
+                            <a href="/signin" class="text-primary">Sign In</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+:root {
+    --primary-color: #0078d4;
+    --secondary-color: #00a2ff;
+    --dark-bg: #1e1e1e;
+    --card-bg: #252526;
+    --text-primary: #ffffff;
+    --text-secondary: #b0b0b0;
+}
+
+.signup-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--dark-bg) 0%, #2a2a72 100%);
+    display: flex;
+    align-items: center;
+    padding: 50px 0;
+}
+
+.signup-content {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.welcome-section {
+    color: var(--text-primary);
+    padding: 40px;
+}
+
+.welcome-content h1 {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(120deg, #ffffff, var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.welcome-content p {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+.features-list {
+    margin-top: 2rem;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+}
+
+.feature-item i {
+    color: var(--secondary-color);
+    margin-right: 1rem;
+    font-size: 1.2rem;
+}
+
+.signup-form-container {
+    background: var(--card-bg);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.signup-form h2 {
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.form-floating > .form-control {
+    background-color: var(--dark-bg);
+    border-color: rgba(255,255,255,0.1);
+    color: var(--text-primary);
+}
+
+.form-floating > .form-control:focus {
+    background-color: var(--dark-bg);
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 0.25rem rgba(0,162,255,0.25);
+}
+
+.form-floating > label {
+    color: var(--text-secondary);
+}
+
+/* Responsive Design */
+@media (max-width: 991.98px) {
+    .welcome-section {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .feature-item {
+        justify-content: center;
+    }
+}
+</style>
+
+<!-- Add Animate.css -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+<script>
+// Password validation
+document.querySelector('.signup-form').addEventListener('submit', function(e) {
+    const password1 = document.getElementById('password1').value;
+    const password2 = document.getElementById('password2').value;
+    
+    if (password1 !== password2) {
+        e.preventDefault();
+        alert('Passwords do not match!');
+    }
+});
+
+// Add floating label animation
+document.querySelectorAll('.form-floating input').forEach(input => {
+    input.addEventListener('focus', function() {
+        this.parentElement.classList.add('focused');
+    });
+    
+    input.addEventListener('blur', function() {
+        if (!this.value) {
+            this.parentElement.classList.remove('focused');
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,82 +1,342 @@
 {% extends 'base.html' %}
 
-{% block title %}Home{% endblock title %}
+{% block title %}Problems{% endblock title %}
 
 {% block account %}
   <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        {{ user.name }}
+    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+      <i class="fas fa-user-circle me-1"></i>{{ user.name }}
     </a>
-    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-      <li><a class="dropdown-item" href="#">Rank : {{ rank }}</a></li>
-      <li><a class="dropdown-item" href="/submissions/{{ user.username }}">My Submissions</a></li>
+    <ul class="dropdown-menu dropdown-menu-end">
+      <li><a class="dropdown-item" href="#"><i class="fas fa-trophy me-2"></i>Rank: {{ rank }}</a></li>
+      <li><a class="dropdown-item" href="/submissions/{{ user.username }}"><i class="fas fa-history me-2"></i>My Submissions</a></li>
       <li><hr class="dropdown-divider"></li>
-      <li><a class="dropdown-item" href="/">Logout</a></li>
+      <li><a class="dropdown-item" href="/"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
     </ul>
   </li>
 {% endblock account %}
 
 {% block problems %}
 <li class="nav-item">
-  <a class="nav-link" href="/problems/{{ user.username }}">Problems</a>
+  <a class="nav-link active" href="/problems/{{ user.username }}">
+    <i class="fas fa-code me-1"></i>Problems
+  </a>
 </li>
 {% endblock problems %}
 
 {% block navbar %}
   <form class="d-flex" method="post" action="/problem_search/{{ user.username }}">
     {% csrf_token %}
-    <input class="form-control me-2" type="search" name="search" placeholder="Search" aria-label="Search">
-    <button class="btn btn-outline-success" type="submit">Search</button>
+    <div class="input-group">
+      <span class="input-group-text bg-dark border-secondary">
+        <i class="fas fa-search text-light"></i>
+      </span>
+      <input class="form-control" type="search" name="search" placeholder="Search problems..." aria-label="Search">
+    </div>
+    <button class="btn btn-outline-success ms-2" type="submit">Search</button>
   </form>
 {% endblock navbar %}
 
-
 {% block body %}
+<div class="container-fluid py-4">
+  <!-- Filters -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="filter-section">
+        <h5 class="mb-3" style="color: var(--text-primary);">
+          <i class="fas fa-filter me-2"></i>Filters
+        </h5>
+        <div class="filter-buttons">
+          <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="topicDropdown" data-bs-toggle="dropdown">
+              <i class="fas fa-tags me-1"></i>Topic
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="/problems/{{ user.username }}">All Topics</a></li>
+              {% for item in types %}
+                <li><a class="dropdown-item" href="/problems/{{ user.username }}/type/{{ item.type }}">{{ item.type }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+          <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="difficultyDropdown" data-bs-toggle="dropdown">
+              <i class="fas fa-signal me-1"></i>Difficulty
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="/problems/{{ user.username }}">All Levels</a></li>
+              <li><a class="dropdown-item" href="/problems/{{ user.username }}/difficuilty/Easy">Easy</a></li>
+              <li><a class="dropdown-item" href="/problems/{{ user.username }}/difficuilty/Medium">Medium</a></li>
+              <li><a class="dropdown-item" href="/problems/{{ user.username }}/difficuilty/Hard">Hard</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<table class="table table-dark table-striped">
-    <thead>
-      <tr>
-        <th scope="col">S.No.</th>
-        <th scope="col">Name</th>
-        <th scope="col dropdown">
-                <a class="nav-link dropdown-toggle px-0 py-0" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color:white">
-                  Topic
-                </a>
-                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="/problems/{{ user.username }}">All</a>
-                    {% for item in types %}
-                        <a class="dropdown-item" href="/problems/{{ user.username }}/type/{{ item.type }}">{{ item.type }}</a>
-                    {% endfor %}
-                </ul>
-        </th>
-        <th scope="col">
-            <a class="nav-link dropdown-toggle px-0 py-0" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color:white">
-                Difficuilty
-              </a>
-              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="/problems/{{ user.username }}">All</a>
-                <a class="dropdown-item" href="/problems/{{ user.username }}/difficuilty/Easy">Easy</a>
-                <a class="dropdown-item" href="/problems/{{ user.username }}/difficuilty/Medium">Medium</a>
-                <a class="dropdown-item" href="/problems/{{ user.username }}/difficuilty/Hard">Hard</a>
-              </ul>
-        </th>
-      </tr>
-    </thead>
-    <tbody>
+  <!-- Problems Grid -->
+  <div class="row g-4">
+    {% for item in problems %}
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="problem-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="problem-number">#{{ forloop.counter }}</span>
+          <span class="difficulty-badge {{ item.difficuilty|lower }}">
+            {{ item.difficuilty }}
+          </span>
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">
+            <a href="/problem_desc/{{ user.username }}/{{ item.id }}" class="text-decoration-none">
+              {{ item.name }}
+            </a>
+          </h5>
+          <div class="problem-meta">
+            <span class="topic-badge">
+              <i class="fas fa-tag me-1"></i>{{ item.type }}
+            </span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <a href="/problem_desc/{{ user.username }}/{{ item.id }}" class="btn btn-primary btn-sm">
+            <i class="fas fa-code me-1"></i>Solve
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
 
-        {% for item in problems %}
-        
-          <tr>
-            <th scope="row">{{ forloop.counter }}</th>
-            <td><a class="nav-link py-1" href="/problem_desc/{{ user.username }}/{{ item.id }}" style="color:white">{{ item.name }}</td>
-            <td>{{ item.type }}</td>
-            <td>{{ item.difficuilty }}</td>
-          </tr>
-        
-        {% endfor %}
-     
-    </tbody>
-  </table>
+<style>
+  .filter-section {
+    background: var(--secondary-bg);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
 
+  .filter-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .problem-card {
+    background: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .problem-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .problem-card .card-header {
+    background: var(--primary-bg);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .problem-number {
+    color: var(--text-secondary);
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+  }
+
+  .difficulty-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .difficulty-badge.easy {
+    background: rgba(40, 167, 69, 0.2);
+    color: #28a745;
+  }
+
+  .difficulty-badge.medium {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+  }
+
+  .difficulty-badge.hard {
+    background: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+  }
+
+  .problem-card .card-body {
+    padding: 1.5rem;
+    flex-grow: 1;
+  }
+
+  .card-title {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    line-height: 1.4;
+  }
+
+  .card-title a {
+    color: var(--text-primary);
+    transition: color 0.2s;
+  }
+
+  .card-title a:hover {
+    color: var(--accent-color);
+  }
+
+  .problem-meta {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .topic-badge {
+    background: var(--primary-bg);
+    color: var(--text-secondary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .problem-card .card-footer {
+    background: var(--primary-bg);
+    border-top: 1px solid var(--border-color);
+    padding: 1rem;
+    border-radius: 0 0 8px 8px;
+  }
+
+  .btn-primary {
+    background: var(--accent-color);
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s, transform 0.2s;
+  }
+
+  .btn-primary:hover {
+    background: #0069d9;
+    transform: translateY(-2px);
+  }
+
+  .dropdown-menu {
+    background: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.5rem;
+    min-width: 200px;
+  }
+
+  .dropdown-item {
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+
+  .dropdown-item:hover {
+    background: var(--primary-bg);
+    color: var(--accent-color);
+  }
+
+  .btn-outline-secondary {
+    border-color: var(--border-color);
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+  }
+
+  .btn-outline-secondary:hover {
+    background: var(--primary-bg);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+  }
+
+  /* Responsive Styles */
+  @media (max-width: 991.98px) {
+    .container-fluid {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+
+    .filter-section {
+      padding: 1rem;
+    }
+
+    .problem-card .card-body {
+      padding: 1.25rem;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .filter-buttons {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .dropdown {
+      width: 100%;
+    }
+
+    .btn-outline-secondary {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-size: 1rem;
+    }
+  }
+
+  @media (max-width: 575.98px) {
+    .container-fluid {
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
+
+    .filter-section {
+      padding: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .problem-card {
+      margin-bottom: 1rem;
+    }
+
+    .problem-card .card-header,
+    .problem-card .card-body,
+    .problem-card .card-footer {
+      padding: 0.75rem;
+    }
+
+    .difficulty-badge,
+    .topic-badge {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+    }
+  }
+</style>
 {% endblock body %}
 

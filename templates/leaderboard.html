@@ -1,42 +1,202 @@
 {% extends 'base.html' %}
 
-{% block title %}Start{% endblock title %}
+{% block title %}Leaderboard{% endblock title %}
+
+{% block account %}
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+    <i class="fas fa-user-circle me-1"></i>{{ current_user.name }}
+  </a>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><a class="dropdown-item" href="/submissions/{{ current_user.username }}"><i class="fas fa-history me-2"></i>My Submissions</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+  </ul>
+</li>
+{% endblock account %}
+
+{% block problems %}
+<li class="nav-item">
+  <a class="nav-link" href="/problems/{{ current_user.username }}">
+    <i class="fas fa-code me-1"></i>Problems
+  </a>
+</li>
+{% endblock problems %}
 
 {% block navbar %}
-
-<form method="get" action="/home" class="d-flex">
-  <input class="form-control me-2 my-2" type="email" id="email" name="email" placeholder="Email" aria-label="Email" style="width: 164px;">
-  <input class="form-control me-2 my-2" type="password" id="password" name="password" placeholder="Password" aria-label="Password" style="width: 164px;">
-  <button class="btn btn-outline-success mx-1 my-2 px-1 py-2" type="submit" style="width: 80px;">Sign in</button>
+<form class="d-flex" method="post" action="/problem_search/{{ current_user.username }}">
+  {% csrf_token %}
+  <div class="input-group">
+    <span class="input-group-text bg-dark border-secondary">
+      <i class="fas fa-search text-light"></i>
+    </span>
+    <input class="form-control" type="search" name="search" placeholder="Search users..." aria-label="Search">
+  </div>
+  <button class="btn btn-outline-success ms-2" type="submit">Search</button>
 </form>
-  
 {% endblock navbar %}
 
-
 {% block body %}
+<div class="container-fluid py-4">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2 class="mb-4" style="color: var(--text-primary);">
+        <i class="fas fa-trophy me-2"></i>Leaderboard
+      </h2>
+    </div>
+  </div>
 
-<table class="table table-dark table-striped">
-    <thead>
-      <tr>
-        <th scope="col">Rank</th>
-        <th scope="col">Name</th>
-        <th scope="col">Problems Solved</th>
-      </tr>
-    </thead>
-    <tbody>
-
-        {% for item in user %}
-        
-          <tr>
-            <th scope="row">{{ forloop.counter }}</th>
-            <td>{{ item.name }}</td>
-            <td>{{ item.problems_solved }}</td>
-          </tr>
-        
+  <div class="row">
+    <div class="col-12">
+      <div class="leaderboard-list">
+        {% for user_item in user %}
+        <div class="leaderboard-card {% if user_item.username == current_user.username %}current-user{% endif %}">
+          <div class="rank-badge">
+            {% if forloop.counter == 1 %}
+              <i class="fas fa-crown" title="1st Place"></i>
+            {% elif forloop.counter == 2 %}
+              <i class="fas fa-medal" title="2nd Place"></i>
+            {% elif forloop.counter == 3 %}
+              <i class="fas fa-award" title="3rd Place"></i>
+            {% else %}
+              #{{ forloop.counter }}
+            {% endif %}
+          </div>
+          <div class="user-info">
+            <div class="user-avatar">
+              <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="user-details">
+              <h5 class="user-name">{{ user_item.name }}</h5>
+              <span class="username">@{{ user_item.username }}</span>
+            </div>
+          </div>
+          <div class="stats">
+            <div class="stat-item">
+              <span class="stat-value">{{ user_item.problems_solved }}</span>
+              <span class="stat-label">Problems Solved</span>
+            </div>
+          </div>
+        </div>
         {% endfor %}
-     
-    </tbody>
-  </table>
+      </div>
+    </div>
+  </div>
+</div>
 
+<style>
+  .leaderboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .leaderboard-card {
+    background: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .leaderboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .leaderboard-card.current-user {
+    background: rgba(0, 122, 204, 0.1);
+    border-color: var(--accent-color);
+  }
+
+  .rank-badge {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-bg);
+    border-radius: 50%;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-family: 'Fira Code', monospace;
+  }
+
+  .rank-badge i {
+    font-size: 1.2rem;
+  }
+
+  .rank-badge i.fa-crown {
+    color: #ffd700;
+  }
+
+  .rank-badge i.fa-medal {
+    color: #c0c0c0;
+  }
+
+  .rank-badge i.fa-award {
+    color: #cd7f32;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+  }
+
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-bg);
+    border-radius: 50%;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+  }
+
+  .user-details {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .user-name {
+    color: var(--text-primary);
+    margin: 0;
+    font-size: 1.1rem;
+  }
+
+  .username {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .stats {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .stat-value {
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  .stat-label {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+  }
+</style>
 {% endblock body %}
 

@@ -1,30 +1,497 @@
 {% extends 'base.html' %}
 
-{% block title %}Start{% endblock title %}
-
-{% block navbar %}
-
-<form method="get" action="/signin" class="d-flex">
-  <input class="form-control me-2 my-2" type="email" id="email" name="email" placeholder="Email" aria-label="Email" style="width: 164px;">
-  <input class="form-control me-2 my-2" type="password" id="password" name="password" placeholder="Password" aria-label="Password" style="width: 164px;">
-  <button class="btn btn-outline-success mx-1 my-2 px-1 py-2" type="submit" style="width: 80px;">Sign in</button>
-</form>
-  
-{% endblock navbar %}
+{% block title %}Compile-Mate - Competitive Programming Platform{% endblock %}
 
 {% block body %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="hero-content">
+        <div class="hero-text">
+            <h1 class="animate__animated animate__fadeInDown">Welcome to Compile-Mate</h1>
+            <p class="animate__animated animate__fadeInUp animate__delay-1s">
+                Your Ultimate Platform for Competitive Programming and Coding Excellence
+            </p>
+            <div class="hero-buttons animate__animated animate__fadeInUp animate__delay-2s">
+                <a href="/signup" class="btn btn-primary btn-lg">Get Started</a>
+                <a href="#features" class="btn btn-outline-light btn-lg ms-3">Learn More</a>
+            </div>
+        </div>
+        <div class="hero-image animate__animated animate__fadeIn animate__delay-1s">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" class="language-icon" alt="Python">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" class="language-icon" alt="C++">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg" class="language-icon" alt="Java">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" class="language-icon" alt="JavaScript">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/csharp/csharp-original.svg" class="language-icon" alt="C#">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original-wordmark.svg" class="language-icon" alt="Go">
+        </div>
+    </div>
+</div>
 
-  <div class="container-fluid mx-0 px-0">
-    <img src="/static/single-3.jpg" class="d-block w-100 h-100" height="700" style="position:absolute;" >
-    <button type="button" class="btn btn-outline-success px-5 my-10" style="position:relative;background: #1da09c;color: white;font-weight: 300;font-size: x-large;border-radius: 52px;top: 425px;left: 525px;" onclick="location.href='/signup'">Create new account</button>
-  </div>
+<!-- Features Section -->
+<section id="features" class="features-section">
+    <div class="container">
+        <h2 class="section-title text-center mb-5">Why Choose Compile-Mate?</h2>
+        <div class="row g-4">
+            <!-- Real-time Code Editor -->
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3>Real-time Code Editor</h3>
+                    <p>Write, compile, and test your code instantly with our powerful editor</p>
+                </div>
+            </div>
+            <!-- Competitive Programming -->
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h3>Competitive Programming</h3>
+                    <p>Solve challenges and climb the leaderboard to showcase your skills</p>
+                </div>
+            </div>
+            <!-- Community -->
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Vibrant Community</h3>
+                    <p>Connect with fellow programmers and learn from the best</p>
+                </div>
+            </div>
+            <!-- Progress Tracking -->
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Progress Tracking</h3>
+                    <p>Monitor your coding journey with detailed analytics</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
-  <!-- Beautiful tagline regarding coding -->
-  <div class="tagline" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; font-family: 'Montserrat', sans-serif;">
-    <h2 style="font-size: 3rem; color: #f39c12;">Unleash Your Creativity with Coding.....!</h2>
-    <p style="font-size: 1.7rem; color: white; font-family: 'Roboto', sans-serif;">Explore the endless possibilities of coding and bring your ideas to life!</p>
-    <p style="font-size: 2.7rem; color: #ff1493; font-family: 'Roboto', sans-serif;">Just by creating a account in Compile-Mate.....!</p>
-  </div>
-  
-  
-{% endblock body %}
+<!-- Login Section -->
+<section class="login-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="login-content">
+                    <h2>Start Your Coding Journey</h2>
+                    <p>Join thousands of programmers and enhance your coding skills</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="login-form-container">
+                    <form method="post" action="/signin" class="login-form">
+                        {% csrf_token %}
+                        <h3>Sign In</h3>
+                        {% if messages %}
+                        <div class="messages">
+                            {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-floating mb-3">
+                            <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
+                            <label for="email">Email address</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                            <label for="password">Password</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Sign In</button>
+                        <div class="mt-3 text-center">
+                            <span>Don't have an account? </span>
+                            <a href="/signup" class="text-primary">Sign Up</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-4">
+                <div class="stat-item">
+                    <div class="stat-number" data-target="1000">0</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-item">
+                    <div class="stat-number" data-target="500">0</div>
+                    <div class="stat-label">Coding Problems</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-item">
+                    <div class="stat-number" data-target="10000">0</div>
+                    <div class="stat-label">Submissions</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4">
+                <h5>About Compile-Mate</h5>
+                <p>Your ultimate platform for competitive programming and coding practice. Join our community and enhance your coding skills.</p>
+            </div>
+            <div class="col-lg-2">
+                <h5>Quick Links</h5>
+                <ul class="footer-links">
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="/problems">Problems</a></li>
+                    <li><a href="/leaderboard">Leaderboard</a></li>
+                    <li><a href="#about">About</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-3">
+                <h5>Connect With Us</h5>
+                <div class="social-links">
+                    <a href="https://github.com/HarshaRockzz" class="social-link"><i class="fab fa-github"></i></a>
+                    <a href="https://www.linkedin.com/in/mamidipaka-harshavardhan/" class="social-link"><i class="fab fa-linkedin"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <h5>Newsletter</h5>
+                <form class="newsletter-form">
+                    <div class="input-group">
+                        <input type="email" class="form-control" placeholder="Enter your email">
+                        <button class="btn btn-primary" type="submit">Subscribe</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Compile-Mate. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<style>
+:root {
+    --primary-color: #0078d4;
+    --secondary-color: #00a2ff;
+    --dark-bg: #1e1e1e;
+    --card-bg: #252526;
+    --text-primary: #ffffff;
+    --text-secondary: #b0b0b0;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, var(--dark-bg) 0%, #2a2a72 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 100px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><rect width="1" height="1" fill="rgba(255,255,255,0.05)"/></svg>');
+    opacity: 0.5;
+}
+
+.hero-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.hero-text {
+    flex: 1;
+    color: var(--text-primary);
+    z-index: 1;
+}
+
+.hero-text h1 {
+    font-size: 4rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(120deg, #ffffff, var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-text p {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+.hero-image {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    max-width: 600px;
+}
+
+.language-icon {
+    width: 80px;
+    height: 80px;
+    filter: drop-shadow(0 0 10px rgba(0,162,255,0.3));
+    transition: transform 0.3s ease;
+}
+
+.language-icon:hover {
+    transform: translateY(-10px);
+}
+
+/* Features Section */
+.features-section {
+    background-color: var(--dark-bg);
+    padding: 100px 0;
+}
+
+.section-title {
+    color: var(--text-primary);
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+}
+
+.feature-card {
+    background: var(--card-bg);
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    color: var(--text-primary);
+    transition: transform 0.3s ease;
+    height: 100%;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+}
+
+.feature-icon {
+    font-size: 2.5rem;
+    color: var(--secondary-color);
+    margin-bottom: 1.5rem;
+}
+
+.feature-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.feature-card p {
+    color: var(--text-secondary);
+}
+
+/* Login Section */
+.login-section {
+    background-color: var(--card-bg);
+    padding: 100px 0;
+}
+
+.login-content {
+    color: var(--text-primary);
+    padding-right: 50px;
+}
+
+.login-content h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.login-form-container {
+    background: var(--dark-bg);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.login-form h3 {
+    color: var(--text-primary);
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+/* Stats Section */
+.stats-section {
+    background: linear-gradient(135deg, var(--dark-bg) 0%, #2a2a72 100%);
+    padding: 80px 0;
+    color: var(--text-primary);
+}
+
+.stat-item {
+    padding: 20px;
+}
+
+.stat-number {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(120deg, #ffffff, var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.stat-label {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+}
+
+/* Footer */
+.footer {
+    background-color: var(--dark-bg);
+    color: var(--text-secondary);
+    padding: 80px 0 20px;
+}
+
+.footer h5 {
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links li {
+    margin-bottom: 0.8rem;
+}
+
+.footer-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: var(--secondary-color);
+}
+
+.social-links {
+    display: flex;
+    gap: 15px;
+}
+
+.social-link {
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    transition: color 0.3s ease;
+}
+
+.social-link:hover {
+    color: var(--secondary-color);
+}
+
+.newsletter-form .input-group {
+    border-radius: 25px;
+    overflow: hidden;
+}
+
+.footer-bottom {
+    margin-top: 50px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    text-align: center;
+}
+
+/* Animations */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+}
+
+.language-icon {
+    animation: float 3s ease-in-out infinite;
+}
+
+.language-icon:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.language-icon:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.language-icon:nth-child(4) {
+    animation-delay: 0.6s;
+}
+
+.language-icon:nth-child(5) {
+    animation-delay: 0.8s;
+}
+
+.language-icon:nth-child(6) {
+    animation-delay: 1s;
+}
+</style>
+
+<!-- Add Animate.css -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+<script>
+// Animate statistics numbers
+document.addEventListener('DOMContentLoaded', function() {
+    const stats = document.querySelectorAll('.stat-number');
+    
+    stats.forEach(stat => {
+        const target = parseInt(stat.getAttribute('data-target'));
+        const increment = target / 200;
+        let current = 0;
+        
+        const updateCount = () => {
+            if(current < target) {
+                current += increment;
+                stat.textContent = Math.ceil(current);
+                setTimeout(updateCount, 1);
+            } else {
+                stat.textContent = target;
+            }
+        };
+        
+        updateCount();
+    });
+});
+
+// Intersection Observer for animations
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+        }
+    });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.feature-card, .stat-item, .login-form-container').forEach((el) => {
+    observer.observe(el);
+});
+</script>
+{% endblock %}

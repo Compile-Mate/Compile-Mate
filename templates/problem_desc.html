@@ -1,125 +1,921 @@
 {% extends 'base.html' %}
 
-{% block title %}Home{% endblock title %}
+{% block title %}{{ problem.name }}{% endblock title %}
 
 {% block account %}
   <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-        {{ user.name }}
+    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+      <i class="fas fa-user-circle me-1"></i>{{ user.name }}
     </a>
-    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-      <li><a class="dropdown-item" href="#">Rank : {{ rank }}</a></li>
-      <li><a class="dropdown-item" href="/submissions/{{ user.username }}">My Submissions</a></li>
+    <ul class="dropdown-menu dropdown-menu-end">
+      <li><a class="dropdown-item" href="#"><i class="fas fa-trophy me-2"></i>Rank: {{ rank }}</a></li>
+      <li><a class="dropdown-item" href="/submissions/{{ user.username }}"><i class="fas fa-history me-2"></i>My Submissions</a></li>
       <li><hr class="dropdown-divider"></li>
-      <li><a class="dropdown-item" href="/">Logout</a></li>
+      <li><a class="dropdown-item" href="/"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
     </ul>
   </li>
 {% endblock account %}
 
-{% block problems %}
-<li class="nav-item">
-  <a class="nav-link" href="/problems/{{ user.username }}">Problems</a>
-</li>
-{% endblock problems %}
-
-{% block navbar %}
-  <form class="d-flex" method="post" action="/problem_search/{{ user.username }}">
-    {% csrf_token %}
-    <input class="form-control me-2" type="search" name="search" placeholder="Search" aria-label="Search">
-    <button class="btn btn-outline-success" type="submit">Search</button>
-  </form>
-{% endblock navbar %}
-
-
 {% block body %}
-
-<div class="col-lg-8 mx-auto p-3 py-md-5">
-    <header class="d-flex align-items-center pb-3 mb-5 border-bottom">
-      <a href="/" class="d-flex align-items-center text-dark text-decoration-none">
-        <span class="fs-4"><h1>{{ problem.name }}</h1></span>
-      </a>
-    </header>
-  
-    <main>
-      <p class="fs-5 col-md-8">{{ problem.statement }}</p>
-
-      <br>
-      <p class="fs-5 col-md-8"><strong>Your Task :</strong> {{ problem.task }}</p>
-      <br>
-
-      <pre style="display:block;padding:9.5px;margin:0px;line-height: 1.42857143;word-break: break-all;word-wrap: break-word;background-color: #f5f5f5;border: 1px solid #ccc;border-radius: 4px;">
-        <p class="fs-5 col-md-8"><strong>Example :</strong> <br>{{ problem.example }}</p>
-      </pre>
-
-      <br>
-      <p class="fs-5 col-md-8"><strong>Expected Time Complexity :</strong> {{ problem.time_complexity }}, <strong>Expected Space Complexity :</strong> {{ problem.space_complexity }}</p>
-      <p class="fs-5 col-md-8"><strong>Constraints :</strong> {{ problem.constraints }}</p>
-
-      <br>
-      <br>
-      <div class="container px-0 mt-4 mb-4">
-        <div class="row fs-5">
-        <form method="post" action="/submit_code/{{ user.username }}/{{ problem.id }}">
-        {% csrf_token %}
-          <div class="fs-6 col-md-12 col-lg-20">
-            <select id="record" name="language" onchange="change_url({{problem.id}})" class="custom-select" >
-                <option selected>Select Language</option>
-                <option value="1">C++</option>
-                <option value="2">Java</option>
-                <option value="3">Python</option>
-              </select>
-            <div class="form-group py-2">
-               <textarea id="editor" name="textarea" style="width: 973px;height : 470px;">Write your Code Here.</textarea>
+{% csrf_token %}
+<div class="leetcode-app">
+  <div class="problem-page">
+    <!-- Left Panel: Problem Description -->
+    <div class="description-panel">
+      <div class="content-area">
+        <!-- Problem Header -->
+        <div class="header-area">
+          <div class="title-area">
+            <div class="problem-info">
+              <span class="problem-id">#{{ problem.id }}.</span>
+              <h1 class="problem-title">{{ problem.name }}</h1>
+              <span class="problem-type">{{ problem.type }}</span>
+            </div>
+            <div class="difficulty-stats">
+              <span class="difficulty {{ problem.difficulty|lower }}">
+                <i class="fas fa-circle me-1"></i>{{ problem.difficulty }}
+              </span>
+              <span class="stats">
+                <span class="time">
+                  <i class="far fa-clock me-1"></i>Time: {{ problem.time_complexity }}
+                </span>
+                <span class="acceptance">
+                  <i class="fas fa-check-circle me-1"></i>Acceptance: {{ problem.acceptance_rate }}%
+                </span>
+              </span>
             </div>
           </div>
-          <button type="submit" class="btn btn-warning my-2 px-5" >Submit</button>
-        </form>
+          <div class="action-buttons">
+            <button class="btn btn-outline-primary btn-sm">
+              <i class="far fa-heart"></i>
+            </button>
+            <button class="btn btn-outline-primary btn-sm ms-2">
+              <i class="far fa-bookmark"></i>
+            </button>
+            <button class="btn btn-outline-primary btn-sm ms-2">
+              <i class="fas fa-share"></i>
+            </button>
+          </div>
         </div>
-      </div>
-      
-      <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-        <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-        </symbol>
-        <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
-        </symbol>
-      </svg>
-      
-      {% if ans == 0 %}
-      <div class="alert alert-success d-flex align-items-center" role="alert">
-        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
-        <div>
-          All Testcases Passed
-        </div>
-      </div>
-      {% endif %}
-      {% if ans > 0 %}
-      <div class="alert alert-warning d-flex align-items-center" role="alert">
-        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Warning:"><use xlink:href="#exclamation-triangle-fill"/></svg>
-        <div>
-          Failed at Testcase {{ ans }}
-        </div>
-      </div>
-      {% endif %}
-      {% if ans == -1 %}
-      <div class="alert alert-danger d-flex align-items-center" role="alert">
-        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
-        <div>
-          Code Error : {{ error }}
-        </div>
-      </div>
-      {% endif %}
-      
-      
-      
-  
 
-    </main>
-    <footer class="pt-5 my-5 text-muted border-top">
-      Created by Compile-Mate &middot; &copy; 2023
-    </footer>
+        <!-- Problem Content -->
+        <div class="description-content">
+          <!-- Problem Statement -->
+          <div class="problem-statement">
+            <div class="statement-area">
+              {{ problem.statement|safe }}
+            </div>
+          </div>
+
+          <!-- Task Description -->
+          <div class="task-area">
+            <h2 class="section-title">Your Task</h2>
+            <div class="task-content">
+              {{ problem.task|safe }}
+            </div>
+          </div>
+
+          <!-- Function Description -->
+          <div class="function-area">
+            <h2 class="section-title">Function Description</h2>
+            <div class="function-content">
+              <p>Complete the function:</p>
+              <div class="code-block">
+                <pre><code>{{ problem.function_signature }}</code></pre>
+              </div>
+              <div class="parameters-area">
+                <h3>Parameters:</h3>
+                <ul class="parameter-list">
+                  {% for param in problem.parameters %}
+                  <li>
+                    <code>{{ param.name }}</code>: {{ param.description }}
+                  </li>
+                  {% endfor %}
+                </ul>
+                <h3>Returns:</h3>
+                <ul class="return-list">
+                  <li>{{ problem.return_description }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Examples -->
+          <div class="examples-area">
+            <h2 class="section-title">Examples</h2>
+            {% for test_case in problem.test_cases.all %}
+            <div class="example-box">
+              <div class="example-header">Example {{ forloop.counter }}</div>
+              <div class="example-body">
+                <div class="example-io">
+                  <div class="io-section">
+                    <div class="io-header">Input:</div>
+                    <pre><code>{{ test_case.input }}</code></pre>
+                  </div>
+                  <div class="io-section">
+                    <div class="io-header">Output:</div>
+                    <pre><code>{{ test_case.output }}</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- Constraints -->
+          <div class="constraints-area">
+            <h2 class="section-title">Constraints</h2>
+            <div class="constraints-content">
+              {% for constraint in problem.constraints %}
+                {% if constraint %}
+                <div class="constraint-item">
+                  <span class="bullet">•</span>
+                  <span class="constraint-text">\({{ constraint|safe }}\)</span>
+                </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel: Code Editor -->
+    <div class="playground-panel">
+      <div class="playground-header">
+        <div class="editor-toolbar">
+          <div class="left-section">
+            <div class="language-select">
+              <select id="language-select" class="form-select" name="language">
+                <option value="python">Python 3</option>
+                <option value="cpp">C++ 17</option>
+                <option value="java">Java 11</option>
+              </select>
+            </div>
+            <div class="editor-actions">
+              <button class="btn-icon" onclick="resetCode()" title="Reset Code">
+                <i class="fas fa-undo"></i>
+              </button>
+              <button class="btn-icon" onclick="formatCode()" title="Format Code">
+                <i class="fas fa-code"></i>
+              </button>
+              <button class="btn-icon" onclick="toggleSettings()" title="Settings">
+                <i class="fas fa-cog"></i>
+              </button>
+            </div>
+          </div>
+          <div class="right-section">
+            <button class="btn-icon" onclick="toggleFullscreen()" title="Full Screen">
+              <i class="fas fa-expand"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="playground-body">
+        <div class="editor-container">
+          <div id="editor"></div>
+        </div>
+        
+        <div class="console-panel">
+          <div class="console-tabs">
+            <button class="console-tab active" data-tab="testcase">Testcase</button>
+            <button class="console-tab" data-tab="result">Result</button>
+            <button class="console-tab" data-tab="output">Output</button>
+          </div>
+          
+          <div class="console-content">
+            <div class="tab-panel active" id="testcase-panel">
+              <div class="testcase-input">
+                <div class="input-header">
+                  <span>Input:</span>
+                  <button class="btn-link" onclick="loadSampleTestcase()">Load Sample Case</button>
+                </div>
+                <textarea id="custom-input" class="form-control" rows="4" placeholder="Enter your test case input here..."></textarea>
+              </div>
+            </div>
+
+            <div class="tab-panel" id="result-panel">
+              <div class="result-header">
+                <div class="status" id="execution-status">
+                  <i class="fas fa-circle-notch fa-spin"></i>
+                  <span>Running...</span>
+                </div>
+                <div class="metrics">
+                  <span id="runtime">Runtime: -- ms</span>
+                  <span id="memory">Memory: -- MB</span>
+                </div>
+              </div>
+              <div class="result-body" id="execution-result">
+                <!-- Results will be displayed here -->
+              </div>
+            </div>
+            
+            <div class="tab-panel" id="output-panel">
+              <pre id="output-content" class="output-pre"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="playground-footer">
+        <div class="action-buttons">
+          <button class="btn btn-primary" onclick="runCode()">
+            <i class="fas fa-play me-2"></i>Run
+          </button>
+          <button class="btn btn-success" onclick="submitCode()">
+            <i class="fas fa-paper-plane me-2"></i>Submit
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
+</div>
 
+<style>
+/* LeetCode-style Layout */
+.leetcode-app {
+  height: calc(100vh - 56px);
+  background: var(--primary-bg);
+}
+
+.problem-page {
+  display: flex;
+  height: 100%;
+}
+
+/* Description Panel */
+.description-panel {
+  width: 40%;
+  height: 100%;
+  border-right: 1px solid var(--border-color);
+  overflow-y: auto;
+  background: #282828;
+}
+
+.content-area {
+  padding: 1.5rem;
+  color: #eff1f6;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Header Area */
+.header-area {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.title-area {
+  margin-bottom: 0.75rem;
+}
+
+.problem-title {
+  font-size: 1.5rem;
+  color: #eff1f6;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.difficulty-stats {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.difficulty {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.difficulty.easy {
+  color: rgb(0, 184, 163);
+}
+
+.difficulty.medium {
+  color: rgb(255, 192, 30);
+}
+
+.difficulty.hard {
+  color: rgb(255, 55, 95);
+}
+
+.stats {
+  display: flex;
+  gap: 1rem;
+  color: #8a8f99;
+  font-size: 0.75rem;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Description Content */
+.description-content {
+  color: #eff1f6;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #eff1f6;
+  margin: 1.5rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Examples */
+.example-box {
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.example-header {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #eff1f6;
+}
+
+.example-body {
+  padding: 16px;
+}
+
+.io-section {
+  margin-bottom: 1rem;
+}
+
+.io-section:last-child {
+  margin-bottom: 0;
+}
+
+.io-header {
+  color: #8a8f99;
+  font-size: 14px;
+  margin-bottom: 0.5rem;
+}
+
+.io-section pre {
+  margin: 0;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 13px;
+  color: #eff1f6;
+  overflow-x: auto;
+}
+
+/* Constraints */
+.constraints-content {
+  padding: 0.5rem 0;
+}
+
+.constraint-item {
+  display: flex;
+  align-items: baseline;
+  padding: 0.25rem 0;
+}
+
+.constraint-item .bullet {
+  color: rgb(67, 160, 255);
+  margin-right: 0.75rem;
+  font-size: 1.2em;
+}
+
+.constraint-text {
+  color: #eff1f6;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* Code blocks and inline code */
+code {
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #eff1f6;
+}
+
+.code-block {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.code-block pre {
+  margin: 0;
+  color: #eff1f6;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Parameters section */
+.parameters-area {
+  margin: 1.5rem 0;
+}
+
+.parameters-area h3 {
+  font-size: 14px;
+  font-weight: 500;
+  color: #eff1f6;
+  margin: 1rem 0 0.5rem;
+}
+
+.parameter-list,
+.return-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0 0 1rem;
+  color: #eff1f6;
+  font-size: 14px;
+}
+
+.parameter-list li,
+.return-list li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+/* Playground Panel */
+.playground-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--secondary-bg);
+}
+
+.playground-header {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.editor-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: #252526;
+  border-bottom: 1px solid #3c3c3c;
+}
+
+.left-section, .right-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.language-select select {
+  background: #3c3c3c;
+  color: #d4d4d4;
+  border: 1px solid #3c3c3c;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 13px;
+}
+
+.btn-icon {
+  background: transparent;
+  border: none;
+  color: #858585;
+  padding: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-icon:hover {
+  background: #3c3c3c;
+  color: #fff;
+}
+
+.playground-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.editor-container {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+
+#editor {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  font-size: 14px;
+  font-family: 'Fira Code', monospace;
+}
+
+.console-panel {
+  height: 200px;
+  background: #1e1e1e;
+  border-top: 1px solid #3c3c3c;
+}
+
+.console-tabs {
+  display: flex;
+  background: #252526;
+  padding: 0 16px;
+}
+
+.console-tab {
+  padding: 8px 16px;
+  color: #858585;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+
+.console-tab.active {
+  color: #fff;
+  border-bottom-color: #0078d4;
+}
+
+.console-content {
+  height: calc(100% - 36px);
+  overflow: auto;
+}
+
+.tab-panel {
+  display: none;
+  height: 100%;
+  padding: 16px;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+.testcase-input {
+  height: 100%;
+}
+
+.input-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #0078d4;
+  padding: 0;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.btn-link:hover {
+  text-decoration: underline;
+}
+
+#custom-input {
+  width: 100%;
+  height: calc(100% - 32px);
+  background: #1e1e1e;
+  color: #d4d4d4;
+  border: 1px solid #3c3c3c;
+  border-radius: 4px;
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  resize: none;
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.status.success { color: #4caf50; }
+.status.error { color: #f44336; }
+.status.running { color: #2196f3; }
+
+.metrics {
+  display: flex;
+  gap: 16px;
+  color: #858585;
+  font-size: 13px;
+}
+
+.result-body {
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.output-pre {
+  margin: 0;
+  padding: 0;
+  color: #d4d4d4;
+  font-family: 'Fira Code', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.playground-footer {
+  padding: 12px 16px;
+  background: #252526;
+  border-top: 1px solid #3c3c3c;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.btn {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: #0078d4;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #006abc;
+}
+
+.btn-success {
+  background: #107c10;
+  color: #fff;
+}
+
+.btn-success:hover {
+  background: #0b5a0b;
+}
+
+/* Additional styles for new elements */
+.problem-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.problem-id {
+  color: #8a8f99;
+  font-size: 1.2rem;
+}
+
+.problem-type {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  color: #8a8f99;
+}
+</style>
+
+<!-- MathJax Config -->
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      processEscapes: true
+    },
+    CommonHTML: {
+      scale: 100
+    }
+  });
+</script>
+
+<script>
+// Initialize templates object with solutions from the admin panel
+const templates = {
+    'python': `{{ problem.python_template|safe }}`,
+    'cpp': `{{ problem.cpp_template|safe }}`,
+    'java': `{{ problem.java_template|safe }}`
+};
+
+// Initialize CodeMirror editor
+let editor;
+const defaultCode = templates['python'];  // Use server-provided templates
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize CodeMirror
+    editor = CodeMirror(document.getElementById('editor'), {
+        mode: 'python',
+        theme: 'dracula',
+        lineNumbers: true,
+        autoCloseBrackets: true,
+        matchBrackets: true,
+        indentUnit: 4,
+        tabSize: 4,
+        lineWrapping: true,
+        extraKeys: {
+            'Tab': 'indentMore',
+            'Shift-Tab': 'indentLess',
+            'Ctrl-/': 'toggleComment'
+        }
+    });
+
+    // Set initial code
+    editor.setValue(defaultCode);
+
+    // Handle language changes
+    document.getElementById('language-select').addEventListener('change', function(e) {
+        const lang = e.target.value;
+        updateEditorMode(lang);
+        editor.setValue(templates[lang]);
+    });
+
+    // Initialize console tabs
+    const consoleTabs = document.querySelectorAll('.console-tab');
+    consoleTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const targetTab = this.getAttribute('data-tab');
+            switchConsoleTab(targetTab);
+        });
+    });
+});
+
+function updateEditorMode(language) {
+    const modeMap = {
+        'python': 'python',
+        'cpp': 'text/x-c++src',
+        'java': 'text/x-java'
+    };
+    editor.setOption('mode', modeMap[language]);
+}
+
+function switchConsoleTab(tabName) {
+    // Update tab active states
+    document.querySelectorAll('.console-tab').forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.getAttribute('data-tab') === tabName) {
+            tab.classList.add('active');
+        }
+    });
+
+    // Update panel visibility
+    document.querySelectorAll('.tab-panel').forEach(panel => {
+        panel.classList.remove('active');
+    });
+    document.getElementById(`${tabName}-panel`).classList.add('active');
+}
+
+function updateExecutionStatus(status, success = true) {
+    const statusElement = document.getElementById('execution-status');
+    statusElement.innerHTML = `
+        <i class="fas fa-${success ? 'check' : 'times'}-circle"></i>
+        <span>${status}</span>
+    `;
+    statusElement.className = `status ${success ? 'success' : 'error'}`;
+}
+
+async function runCode() {
+    const code = editor.getValue();
+    const language = document.getElementById('language-select').value;
+    const input = document.getElementById('custom-input').value;
+
+    // Show loading state
+    updateExecutionStatus('Running...', true);
+    document.getElementById('runtime').textContent = 'Runtime: --';
+    document.getElementById('memory').textContent = 'Memory: --';
+    
+    try {
+        const response = await fetch('/run_code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                code: code,
+                language: language,
+                input: input
+            })
+        });
+
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            updateExecutionStatus('Execution Successful', true);
+            document.getElementById('runtime').textContent = `Runtime: ${result.runtime}ms`;
+            document.getElementById('memory').textContent = `Memory: ${result.memory_used}MB`;
+            document.getElementById('output-content').textContent = result.output;
+        } else {
+            updateExecutionStatus('Execution Failed', false);
+            document.getElementById('output-content').textContent = result.error;
+        }
+        
+        // Switch to result tab
+        switchConsoleTab('result');
+    } catch (error) {
+        updateExecutionStatus('Error', false);
+        document.getElementById('output-content').textContent = 'An error occurred while running the code.';
+    }
+}
+
+async function submitCode() {
+    const response = await fetch(`/submit_code/{{ user.username }}/{{ problem.id }}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            code: editor.getValue(),
+            language: document.getElementById('language-select').value
+        })
+    });
+
+    const result = await response.json();
+    
+    if (result.status === 'success') {
+        updateExecutionStatus('Accepted', true);
+        document.getElementById('runtime').textContent = `Runtime: ${result.runtime}ms`;
+        document.getElementById('memory').textContent = `Memory: ${result.memory}MB`;
+        document.getElementById('execution-result').textContent = result.message;
+    } else {
+        updateExecutionStatus('Failed', false);
+        document.getElementById('execution-result').textContent = result.error;
+        if (result.failed_test_case) {
+            document.getElementById('execution-result').textContent += `\nFailed at test case ${result.failed_test_case}`;
+        }
+    }
+    
+    switchConsoleTab('result');
+}
+
+function resetCode() {
+    const language = document.getElementById('language-select').value;
+    editor.setValue(templates[language]);
+}
+
+function formatCode() {
+    // Basic indentation formatting
+    editor.execCommand('indentAuto');
+}
+
+function loadSampleTestcase() {
+    document.getElementById('custom-input').value = `{{ problem.sample_test_cases.0.input }}`;
+}
+
+function toggleFullscreen() {
+    const editorContainer = document.querySelector('.playground-panel');
+    if (!document.fullscreenElement) {
+        editorContainer.requestFullscreen();
+    } else {
+        document.exitFullscreen();
+    }
+}
+</script>
+
+<!-- Add CodeMirror CSS and JS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchbrackets.min.js"></script>
 {% endblock body %}
 
