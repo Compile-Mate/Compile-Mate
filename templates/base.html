@@ -10,8 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    <title>{% block title %} {% endblock title %} | Compile-Mate</title>
-    <link rel="icon" href="/static/logo.svg" type="image/svg+xml"/>
+   <title>{% block title %} {% endblock title %} | Compile-Mate</title>
+   <link rel="icon" href="https://qph.cf2.quoracdn.net/main-qimg-a9f5aba3427dc23e7d569affa937805f" type="image/png"/>   
     <style>
       :root {
         --primary-bg: #1e1e1e;
@@ -50,6 +50,21 @@
         margin-right: 0.5rem;
         width: 40px;
         height: 40px;
+        object-fit: contain;
+      }
+
+      /* Fallback for logo */
+      .navbar-brand .logo-fallback {
+        width: 40px;
+        height: 40px;
+        margin-right: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--accent-color);
+        border-radius: 50%;
+        font-size: 20px;
+        color: white;
       }
 
       .nav-link {
@@ -295,11 +310,11 @@
     </style>
   </head>
   <body>
-    
+    {% load static %}
     <nav class="navbar navbar-expand-lg">
       <div class="container-fluid">
         <a class="navbar-brand" href="">
-          <img src="/static/logo.svg" alt="Compile-Mate Logo" width="40" height="40" class="d-inline-block">
+          <img src="https://qph.cf2.quoracdn.net/main-qimg-a9f5aba3427dc23e7d569affa937805f" alt="Compile-Mate Logo" width="40" height="40" class="d-inline-block">
           Compile-Mate
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
