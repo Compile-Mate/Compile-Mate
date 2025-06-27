@@ -1,0 +1,460 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full" x-data="{darkMode: (localStorage.getItem('darkMode') === 'true') }" x-init="if(darkMode){document.documentElement.classList.add('dark');} else {document.documentElement.classList.remove('dark');}" x-effect="darkMode ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark'); localStorage.setItem('darkMode', darkMode)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CompileMate{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        success: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- LottieFiles Player -->
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    
+    <!-- particles.js -->
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <style>
+        [x-cloak] { display: none !important; }
+        
+        .animate-coin {
+            animation: coinPop 0.6s ease-out;
+        }
+        
+        @keyframes coinPop {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+            100% { transform: scale(1) rotate(360deg); opacity: 1; }
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Form field styling */
+        input[type="text"], input[type="email"], input[type="password"], input[type="number"], 
+        input[type="url"], input[type="tel"], textarea, select {
+            @apply w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors;
+        }
+        
+        input[type="checkbox"] {
+            @apply h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded;
+        }
+        
+        input[type="radio"] {
+            @apply h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300;
+        }
+        
+        /* Django form field styling */
+        .form-control {
+            @apply w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors;
+        }
+        
+        .form-control:focus {
+            @apply ring-2 ring-blue-500 border-blue-500;
+        }
+        
+        /* Error styling */
+        .errorlist {
+            @apply text-red-600 text-sm mt-1;
+        }
+        
+        .field-error {
+            @apply border-red-300 focus:ring-red-500 focus:border-red-500;
+        }
+    </style>
+    
+    <link rel="icon" type="image/png" href="{% static 'logo.png' %}">
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="h-full bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+    <!-- Particle Background (optional, can be overridden per page) -->
+    <div id="particles-js" class="fixed inset-0 z-0 pointer-events-none"></div>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        if (document.getElementById('particles-js')) {
+          particlesJS('particles-js', {
+            particles: {
+              number: { value: 60, density: { enable: true, value_area: 800 } },
+              color: { value: '#60a5fa' },
+              shape: { type: 'circle' },
+              opacity: { value: 0.2, random: true },
+              size: { value: 4, random: true },
+              line_linked: { enable: true, distance: 150, color: '#60a5fa', opacity: 0.1, width: 1 },
+              move: { enable: true, speed: 2, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false }
+            },
+            interactivity: {
+              detect_on: 'canvas',
+              events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' }, resize: true },
+              modes: { repulse: { distance: 100, duration: 0.4 }, push: { particles_nb: 4 } }
+            },
+            retina_detect: true
+          });
+        }
+      });
+    </script>
+    
+    <!-- Sound Effects (optional) -->
+    <audio id="sound-success" src="https://cdn.pixabay.com/audio/2022/07/26/audio_124bfae5b2.mp3" preload="auto"></audio>
+    <audio id="sound-error" src="https://cdn.pixabay.com/audio/2022/07/26/audio_124bfae5b2.mp3" preload="auto"></audio>
+    <audio id="sound-click" src="https://cdn.pixabay.com/audio/2022/07/26/audio_124bfae5b2.mp3" preload="auto"></audio>
+    <button id="mute-toggle" class="fixed top-4 right-4 z-50 bg-white/80 dark:bg-gray-800/80 rounded-full p-2 shadow-lg hover:scale-110 transition" title="Toggle sound">
+        <span id="mute-icon">🔊</span>
+    </button>
+    <script>
+      // Sound effect logic
+      let muted = localStorage.getItem('muted') === 'true';
+      const muteBtn = document.getElementById('mute-toggle');
+      const muteIcon = document.getElementById('mute-icon');
+      function updateMuteIcon() { muteIcon.textContent = muted ? '🔇' : '🔊'; }
+      updateMuteIcon();
+      muteBtn.onclick = function() {
+        muted = !muted;
+        localStorage.setItem('muted', muted);
+        updateMuteIcon();
+      };
+      function playSound(id) {
+        if (!muted) {
+          const audio = document.getElementById(id);
+          if (audio) { audio.currentTime = 0; audio.play(); }
+        }
+      }
+      window.playSuccess = () => playSound('sound-success');
+      window.playError = () => playSound('sound-error');
+      window.playClick = () => playSound('sound-click');
+      // Example: add playClick() to button onclicks
+    </script>
+
+    <!-- Navigation -->
+    <nav class="bg-white dark:bg-gray-800 shadow-lg sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <!-- Logo and main nav -->
+                <div class="flex items-center">
+                    <a href="{% url 'core:home' %}" class="flex items-center space-x-2">
+                        <img src="{% static 'logo.png' %}" alt="CompileMate Logo" class="w-10 h-10 rounded-lg shadow" />
+                        <span class="text-xl font-bold text-gray-900 dark:text-white">CompileMate</span>
+                    </a>
+                    
+                    <div class="hidden md:ml-10 md:flex md:space-x-8">
+                        <a href="{% url 'problems:problem_list' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            Problems
+                        </a>
+                        <a href="{% url 'contests:contest_list' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            Contests
+                        </a>
+                        <a href="{% url 'rewards:marketplace' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            Marketplace
+                        </a>
+                        <a href="{% url 'core:leaderboard' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            Leaderboard
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Right side -->
+                <div class="flex items-center space-x-4">
+                    <!-- Dark mode toggle -->
+                    <button @click="darkMode = !darkMode" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                        <svg x-show="!darkMode" class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                        </svg>
+                        <svg x-show="darkMode" class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                    
+                    {% if user.is_authenticated %}
+                        <!-- User coins -->
+                        <div class="hidden sm:flex items-center space-x-2 bg-yellow-100 dark:bg-yellow-900 px-3 py-1 rounded-full">
+                            <span class="text-yellow-600 dark:text-yellow-400 font-medium">{{ user.coins }}</span>
+                            <span class="text-yellow-600 dark:text-yellow-400">🪙</span>
+                        </div>
+                        
+                        <!-- User menu -->
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open" class="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                                {% if user.avatar %}
+                                    <img class="w-8 h-8 rounded-full" src="{{ user.avatar.url }}" alt="{{ user.username }}">
+                                {% else %}
+                                    <div class="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
+                                        <span class="text-white font-medium text-sm">{{ user.username|first|upper }}</span>
+                                    </div>
+                                {% endif %}
+                                <span class="hidden sm:block text-sm font-medium">{{ user.username }}</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            
+                            <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50">
+                                <a href="{% url 'core:dashboard' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    Dashboard
+                                </a>
+                                <a href="{% url 'core:profile' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    Profile
+                                </a>
+                                <a href="{% url 'rewards:user_rewards' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    My Rewards
+                                </a>
+                                <a href="{% url 'problems:submission_list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    Submissions
+                                </a>
+                                <hr class="my-1 border-gray-200 dark:border-gray-600">
+                                <a href="{% url 'account_logout' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    Sign Out
+                                </a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- Auth buttons -->
+                        <div class="flex items-center space-x-2">
+                            <a href="{% url 'account_login' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                                Sign In
+                            </a>
+                            <a href="{% url 'account_signup' %}" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                                Sign Up
+                            </a>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Mobile menu button -->
+                    <div class="md:hidden">
+                        <button @click="$dispatch('toggle-mobile-menu')" class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div x-data="{ open: false }" @toggle-mobile-menu.window="open = !open" x-show="open" x-transition class="md:hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                <a href="{% url 'problems:problem_list' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 block px-3 py-2 rounded-md text-base font-medium">
+                    Problems
+                </a>
+                <a href="{% url 'contests:contest_list' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 block px-3 py-2 rounded-md text-base font-medium">
+                    Contests
+                </a>
+                <a href="{% url 'rewards:marketplace' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 block px-3 py-2 rounded-md text-base font-medium">
+                    Marketplace
+                </a>
+                <a href="{% url 'core:leaderboard' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 block px-3 py-2 rounded-md text-base font-medium">
+                    Leaderboard
+                </a>
+                {% if user.is_authenticated %}
+                <hr class="border-gray-200 dark:border-gray-600">
+                <a href="{% url 'core:dashboard' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 block px-3 py-2 rounded-md text-base font-medium">
+                    Dashboard
+                </a>
+                <a href="{% url 'core:profile' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 block px-3 py-2 rounded-md text-base font-medium">
+                    Profile
+                </a>
+                <a href="{% url 'rewards:user_rewards' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 block px-3 py-2 rounded-md text-base font-medium">
+                    My Rewards
+                </a>
+                <a href="{% url 'account_logout' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 block px-3 py-2 rounded-md text-base font-medium">
+                    Sign Out
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main content -->
+    <main class="relative z-10">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-16">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
+                            <span class="text-white font-bold text-lg">C</span>
+                        </div>
+                        <span class="text-xl font-bold text-gray-900 dark:text-white">CompileMate</span>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">
+                        The ultimate gamified competitive programming platform. Solve problems, earn MateCoins, and redeem real-world rewards.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-gray-500">
+                            <span class="sr-only">Twitter</span>
+                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-gray-500">
+                            <span class="sr-only">GitHub</span>
+                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase mb-4">Platform</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'problems:problem_list' %}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Problems</a></li>
+                        <li><a href="{% url 'contests:contest_list' %}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Contests</a></li>
+                        <li><a href="{% url 'rewards:marketplace' %}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Marketplace</a></li>
+                        <li><a href="{% url 'core:leaderboard' %}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Leaderboard</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-400 tracking-wider uppercase mb-4">Support</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'core:faq' %}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">FAQ</a></li>
+                        <li><a href="{% url 'core:contact' %}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Contact</a></li>
+                        <li><a href="{% url 'core:about' %}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">About</a></li>
+                        <li><a href="{% url 'core:privacy' %}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">Privacy</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+                <p class="text-gray-400 text-sm text-center">
+                    © 2024 CompileMate. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Notification toast -->
+    <div id="toast" class="fixed top-4 right-4 z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 max-w-sm">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <svg id="toast-icon" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div class="ml-3 w-0 flex-1">
+                    <p id="toast-message" class="text-sm font-medium text-gray-900 dark:text-white"></p>
+                </div>
+                <div class="ml-4 flex-shrink-0 flex">
+                    <button onclick="hideToast()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toast notification functions
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const messageEl = document.getElementById('toast-message');
+            const icon = document.getElementById('toast-icon');
+            
+            messageEl.textContent = message;
+            
+            // Set icon based on type
+            if (type === 'success') {
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+                icon.className = 'h-6 w-6 text-green-400';
+            } else if (type === 'error') {
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+                icon.className = 'h-6 w-6 text-red-400';
+            } else if (type === 'warning') {
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>';
+                icon.className = 'h-6 w-6 text-yellow-400';
+            }
+            
+            toast.classList.remove('hidden');
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                hideToast();
+            }, 5000);
+        }
+        
+        function hideToast() {
+            document.getElementById('toast').classList.add('hidden');
+        }
+        
+        // Coin animation function
+        function animateCoin(x, y) {
+            const coin = document.createElement('div');
+            coin.className = 'fixed z-50 text-2xl animate-coin';
+            coin.textContent = '🪙';
+            coin.style.left = x + 'px';
+            coin.style.top = y + 'px';
+            
+            document.body.appendChild(coin);
+            
+            setTimeout(() => {
+                document.body.removeChild(coin);
+            }, 600);
+        }
+        
+        // Global error handler
+        window.addEventListener('error', function(e) {
+            console.error('Global error:', e.error);
+            showToast('An unexpected error occurred', 'error');
+        });
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html> 

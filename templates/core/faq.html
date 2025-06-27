@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}FAQ - CompileMate{% endblock %}
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-yellow-50 to-pink-100 py-12">
+  <div class="max-w-3xl mx-auto px-4">
+    <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h1>
+      <div x-data="{ open: 0 }" class="space-y-4">
+        <div class="border-b pb-4">
+          <button @click="open === 1 ? open = 0 : open = 1" class="w-full text-left flex justify-between items-center text-lg font-medium text-indigo-700 focus:outline-none">
+            How do I join a contest?
+            <span x-show="open !== 1">+</span><span x-show="open === 1">-</span>
+          </button>
+          <div x-show="open === 1" class="mt-2 text-gray-600">Go to the Contests page, select an ongoing or upcoming contest, and click Join or Register.</div>
+        </div>
+        <div class="border-b pb-4">
+          <button @click="open === 2 ? open = 0 : open = 2" class="w-full text-left flex justify-between items-center text-lg font-medium text-indigo-700 focus:outline-none">
+            What are MateCoins?
+            <span x-show="open !== 2">+</span><span x-show="open === 2">-</span>
+          </button>
+          <div x-show="open === 2" class="mt-2 text-gray-600">MateCoins are in-platform currency you earn by solving problems and participating in contests. Spend them in the marketplace!</div>
+        </div>
+        <div class="border-b pb-4">
+          <button @click="open === 3 ? open = 0 : open = 3" class="w-full text-left flex justify-between items-center text-lg font-medium text-indigo-700 focus:outline-none">
+            How do I get AI code review?
+            <span x-show="open !== 3">+</span><span x-show="open === 3">-</span>
+          </button>
+          <div x-show="open === 3" class="mt-2 text-gray-600">After submitting a solution, click the 'Request AI Review' button on your submission page (feature coming soon!).</div>
+        </div>
+        <div class="border-b pb-4">
+          <button @click="open === 4 ? open = 0 : open = 4" class="w-full text-left flex justify-between items-center text-lg font-medium text-indigo-700 focus:outline-none">
+            Can I discuss problems with others?
+            <span x-show="open !== 4">+</span><span x-show="open === 4">-</span>
+          </button>
+          <div x-show="open === 4" class="mt-2 text-gray-600">Yes! Each problem has a discussion section for hints and solutions.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} 

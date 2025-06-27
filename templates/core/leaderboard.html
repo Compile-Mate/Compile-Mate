@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Leaderboard - CompileMate{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Leaderboard</h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                See who's dominating the programming challenges and climb your way to the top
+            </p>
+        </div>
+
+        <!-- Leaderboard Filters (UI only, not functional yet) -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="flex flex-wrap gap-4 items-center">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Time Period</label>
+                    <select class="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        <option value="all-time">All Time</option>
+                        <option value="monthly">This Month</option>
+                        <option value="weekly">This Week</option>
+                        <option value="daily">Today</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                    <select class="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        <option value="overall">Overall</option>
+                        <option value="algorithms">Algorithms</option>
+                        <option value="data-structures">Data Structures</option>
+                        <option value="dynamic-programming">Dynamic Programming</option>
+                    </select>
+                </div>
+                <div class="flex-1"></div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600">Your Rank:</span>
+                    <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full font-semibold">
+                        {% if user_rank %}#{{ user_rank }}{% else %}-{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top 3 Podium -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            {% for user in top3 %}
+            <div class="order-{{ forloop.counter }} md:order-{{ forloop.counter }}">
+                <div class="{% if forloop.counter == 1 %}bg-gradient-to-br from-yellow-400 to-yellow-600{% elif forloop.counter == 2 %}bg-gradient-to-br from-gray-300 to-gray-400{% elif forloop.counter == 3 %}bg-gradient-to-br from-orange-400 to-yellow-500{% else %}bg-white{% endif %} rounded-lg shadow-lg p-6 text-center relative {% if forloop.counter == 1 %}transform scale-110{% endif %}">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <div class="{% if forloop.counter == 1 %}bg-yellow-400 text-white{% elif forloop.counter == 2 %}bg-gray-300 text-gray-700{% elif forloop.counter == 3 %}bg-orange-400 text-white{% else %}bg-gray-200 text-gray-700{% endif %} w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl">{{ forloop.counter }}</div>
+                    </div>
+                    <div class="mt-4">
+                        {% if user.avatar %}
+                            <img src="{{ user.avatar.url }}" alt="User" class="w-20 h-20 rounded-full mx-auto mb-4 {% if forloop.counter == 1 %}border-4 border-white{% endif %}">
+                        {% else %}
+                            <div class="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold text-gray-500">{{ user.username|first|upper }}</div>
+                        {% endif %}
+                        <h3 class="text-xl font-bold {% if forloop.counter == 1 %}text-white{% elif forloop.counter == 2 %}text-gray-900{% elif forloop.counter == 3 %}text-white{% else %}text-gray-900{% endif %} mb-2">{{ user.get_full_name|default:user.username }}</h3>
+                        <p class="{% if forloop.counter == 1 %}text-yellow-100{% elif forloop.counter == 2 %}text-gray-600{% elif forloop.counter == 3 %}text-orange-100{% else %}text-gray-600{% endif %} mb-4">@{{ user.username }}</p>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="{% if forloop.counter == 1 %}text-yellow-100{% elif forloop.counter == 2 %}text-gray-500{% elif forloop.counter == 3 %}text-orange-100{% else %}text-gray-500{% endif %}">Score:</span>
+                                <span class="font-semibold {% if forloop.counter == 1 %}text-white{% elif forloop.counter == 2 %}text-gray-900{% elif forloop.counter == 3 %}text-white{% else %}text-gray-900{% endif %}">{{ user.xp|default:0 }}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="{% if forloop.counter == 1 %}text-yellow-100{% elif forloop.counter == 2 %}text-gray-500{% elif forloop.counter == 3 %}text-orange-100{% else %}text-gray-500{% endif %}">Problems:</span>
+                                <span class="font-semibold {% if forloop.counter == 1 %}text-white{% elif forloop.counter == 2 %}text-gray-900{% elif forloop.counter == 3 %}text-white{% else %}text-gray-900{% endif %}">{{ user.problems_solved|default:0 }}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="{% if forloop.counter == 1 %}text-yellow-100{% elif forloop.counter == 2 %}text-gray-500{% elif forloop.counter == 3 %}text-orange-100{% else %}text-gray-500{% endif %}">MateCoins:</span>
+                                <span class="font-semibold text-yellow-600">{{ user.coins|default:0 }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Full Leaderboard Table -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900">Full Rankings</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Problems Solved</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">MateCoins</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Join Date</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for user in rest %}
+                        <tr class="hover:bg-gray-50 {% if user.id == request.user.id %}bg-purple-50{% endif %}">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="{% if forloop.counter0|add:'4' <= 3 %}bg-yellow-500 text-white{% elif forloop.counter0|add:'4' == 2 %}bg-gray-300 text-gray-700{% elif forloop.counter0|add:'4' == 3 %}bg-orange-400 text-white{% else %}bg-gray-200 text-gray-700{% endif %} px-2 py-1 rounded-full text-xs font-bold">{{ forloop.counter0|add:'4' }}</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    {% if user.avatar %}
+                                        <img src="{{ user.avatar.url }}" alt="User" class="w-10 h-10 rounded-full">
+                                    {% else %}
+                                        <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-lg font-bold text-gray-500">{{ user.username|first|upper }}</div>
+                                    {% endif %}
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">{{ user.get_full_name|default:user.username }}</div>
+                                        <div class="text-sm text-gray-500">@{{ user.username }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{{ user.xp|default:0 }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ user.problems_solved|default:0 }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-yellow-600">{{ user.coins|default:0 }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.date_joined|date:"M Y" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination (not functional yet) -->
+        <div class="mt-8 flex justify-center">
+            <nav class="flex items-center space-x-2">
+                <button class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                    Previous
+                </button>
+                <button class="px-3 py-2 text-sm font-medium text-white bg-purple-600 border border-purple-600 rounded-md">1</button>
+                <button class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">2</button>
+                <button class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">3</button>
+                <span class="px-3 py-2 text-sm text-gray-500">...</span>
+                <button class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">10</button>
+                <button class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                    Next
+                </button>
+            </nav>
+        </div>
+    </div>
+</div>
+{% endblock %} 

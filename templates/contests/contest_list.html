@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contests - CompileMate{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Programming Contests</h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Compete with fellow programmers, solve challenging problems, and climb the leaderboard
+            </p>
+        </div>
+
+        <!-- Contest Filters -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="flex flex-wrap gap-4 items-center">
+                <div class="flex-1 min-w-64">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Search Contests</label>
+                    <input type="text" placeholder="Search by title..." 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                    <select class="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">All</option>
+                        <option value="upcoming">Upcoming</option>
+                        <option value="ongoing">Ongoing</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Difficulty</label>
+                    <select class="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">All</option>
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contest Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for contest in page_obj %}
+            <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+                <div class="p-4 {% if contest.status == 'ongoing' %}bg-gradient-to-r from-green-400 to-green-600{% elif contest.status == 'upcoming' %}bg-gradient-to-r from-yellow-400 to-yellow-600{% else %}bg-gradient-to-r from-red-400 to-red-600{% endif %}">
+                    <div class="flex justify-between items-center">
+                        <span class="text-white font-semibold">{{ contest.status|title }}</span>
+                        <span class="bg-white {% if contest.difficulty == 'easy' %}text-green-600{% elif contest.difficulty == 'medium' %}text-yellow-600{% else %}text-red-600{% endif %} px-2 py-1 rounded-full text-xs font-medium">{{ contest.difficulty|title }}</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">{{ contest.title }}</h3>
+                    <p class="text-gray-600 mb-4">{{ contest.description|truncatewords:15 }}</p>
+                    <div class="space-y-2 mb-4">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Duration:</span>
+                            <span class="font-medium">{{ contest.duration_display }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Problems:</span>
+                            <span class="font-medium">{{ contest.num_problems }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Participants:</span>
+                            <span class="font-medium">{{ contest.participants.count }}</span>
+                        </div>
+                    </div>
+                    {% if contest.status == 'ongoing' %}
+                        <a href="{% url 'contests:contest_detail' contest.slug %}" class="w-full block bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-200 font-medium text-center">Join Contest</a>
+                    {% elif contest.status == 'upcoming' %}
+                        <a href="{% url 'contests:contest_register' contest.slug %}" class="w-full block bg-yellow-600 text-white py-2 px-4 rounded-md hover:bg-yellow-700 transition-colors duration-200 font-medium text-center">Register</a>
+                    {% else %}
+                        <a href="{% url 'contests:contest_detail' contest.slug %}" class="w-full block bg-gray-400 text-white py-2 px-4 rounded-md font-medium text-center cursor-not-allowed">View Results</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-3 text-center text-gray-500 py-12">No contests found.</div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        <div class="text-center mt-12">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 bg-gray-200 rounded-l">Previous</a>
+            {% endif %}
+            <span class="px-4 py-2 bg-indigo-600 text-white">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 bg-gray-200 rounded-r">Next</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 
