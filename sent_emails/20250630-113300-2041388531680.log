@@ -1,0 +1,18 @@
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Subject: [example.com] Please Confirm Your Email Address
+From: webmaster@localhost
+To: harshavardhan.m21@iiits.in
+Date: Mon, 30 Jun 2025 06:03:00 -0000
+Message-ID: <175126338024.19804.16159490228956105647@Harshavardhan>
+
+Hello from example.com!
+
+You're receiving this email because user harshavardhan.m21 has given your email address to register an account on example.com.
+
+To confirm this is correct, go to http://127.0.0.1:8000/accounts/confirm-email/NA:1uW7bY:288YdsbSOC_s_kPuphxXA3DBqOkPUjDopogt6oInA7A/
+
+Thank you for using example.com!
+example.com
+-------------------------------------------------------------------------------

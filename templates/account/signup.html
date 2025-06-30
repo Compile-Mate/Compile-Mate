@@ -1,0 +1,165 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+{% load account socialaccount %}
+
+{% block head_title %}{% trans "Sign Up" %}{% endblock %}
+
+{% block inner_content %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-400 via-teal-500 to-blue-500 py-8">
+    <div class="relative w-full max-w-md mx-auto">
+        <!-- Animated background shapes -->
+        <div class="absolute -top-10 -left-10 w-32 h-32 bg-green-200 rounded-full opacity-30 animate-pulse"></div>
+        <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-200 rounded-full opacity-20 animate-pulse"></div>
+        <div class="relative z-10 bg-white/90 dark:bg-gray-900/90 rounded-3xl shadow-2xl p-10">
+            <div class="flex flex-col items-center mb-8">
+                <div class="bg-gradient-to-r from-green-600 to-teal-600 rounded-full p-4 shadow-lg mb-4 animate-bounce">
+                    <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white mb-2">Join CompileMate</h2>
+                <p class="text-gray-600 dark:text-gray-300">Start your competitive programming journey today</p>
+            </div>
+            <!-- Google Auth Button (always visible) -->
+            {% get_providers as socialaccount_providers %}
+            {% for provider in socialaccount_providers %}
+                {% if provider.id == "google" %}
+                <div class="mb-6">
+                    <a href="{% provider_login_url provider.id %}" class="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-gray-200 rounded-lg shadow-sm bg-white hover:bg-gray-50 transition-colors duration-200 font-semibold text-lg text-gray-700 animate-fade-in-up focus:ring-2 focus:ring-green-400">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Logo_2013_Google.png" alt="Google" class="w-6 h-6"> Sign up with Google
+                    </a>
+                </div>
+                {% endif %}
+            {% endfor %}
+            <div class="relative mb-6 flex items-center">
+                <div class="flex-grow border-t border-gray-300"></div>
+                <span class="mx-4 text-gray-400 font-medium">or</span>
+                <div class="flex-grow border-t border-gray-300"></div>
+            </div>
+            <p class="text-center text-gray-600 dark:text-gray-300 mb-6 animate-fade-in-up delay-200">
+                {% blocktrans %}Already have an account? Then please <a href="{{ login_url }}" class="text-blue-600 hover:text-blue-500 font-medium">sign in</a>.{% endblocktrans %}
+            </p>
+            <form class="signup space-y-6 animate-fade-in-up delay-300" id="signup_form" method="post" action="{% url 'account_signup' %}">
+                {% csrf_token %}
+                {% if form.errors %}
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div class="text-red-800 text-sm">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                {% for field in form %}
+                <div class="relative group">
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ field.label }}
+                    </label>
+                    <div class="relative">
+                        {{ field }}
+                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-green-600 transition-colors">
+                            {% if field.label == 'Password' %}🔑{% elif field.label == 'Email' %}📧{% endif %}
+                        </span>
+                    </div>
+                    {% if field.name == 'password1' %}
+                    <!-- Live Password Checklist -->
+                    <ul id="password-checklist" class="mt-2 space-y-1 text-sm">
+                        <li id="pw-length" class="flex items-center gap-2 text-gray-500 transition-all"><span class="pw-icon">⚪</span> At least 8 characters</li>
+                        <li id="pw-common" class="flex items-center gap-2 text-gray-500 transition-all"><span class="pw-icon">⚪</span> Not a common password</li>
+                        <li id="pw-numeric" class="flex items-center gap-2 text-gray-500 transition-all"><span class="pw-icon">⚪</span> Not entirely numeric</li>
+                    </ul>
+                    {% endif %}
+                    {% if field.help_text and field.name != 'password1' %}
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ field.help_text }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                {% endif %}
+                <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-teal-600 text-white py-3 px-4 rounded-xl font-bold text-lg shadow-lg hover:from-green-700 hover:to-teal-700 transition-all duration-200 transform hover:scale-105">
+                    {% trans "Create Account" %}
+                </button>
+            </form>
+            <div class="mt-6 text-center animate-fade-in-up delay-400">
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                    By signing up, you agree to our 
+                    <a href="#" class="text-blue-600 hover:text-blue-500">Terms of Service</a> 
+                    and 
+                    <a href="#" class="text-blue-600 hover:text-blue-500">Privacy Policy</a>
+                </p>
+            </div>
+            </div>
+        </div>
+    </div>
+    <style>
+    @keyframes fade-in-up {
+      0% { opacity: 0; transform: translateY(40px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in-up { animation: fade-in-up 1s cubic-bezier(0.4,0,0.2,1) both; }
+    .animate-fade-in-up.delay-200 { animation-delay: 0.2s; }
+    .animate-fade-in-up.delay-300 { animation-delay: 0.3s; }
+    .animate-fade-in-up.delay-400 { animation-delay: 0.4s; }
+@keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+.animate-bounce { animation: bounce 2s infinite; }
+    </style>
+    <script>
+    // Live password checklist animation
+    document.addEventListener('DOMContentLoaded', function() {
+      const pwInput = document.querySelector('input[name="password1"]');
+      if (!pwInput) return;
+      const lengthLi = document.getElementById('pw-length');
+      const commonLi = document.getElementById('pw-common');
+      const numericLi = document.getElementById('pw-numeric');
+      const commonPasswords = ["password", "12345678", "qwerty", "letmein", "admin", "welcome", "iloveyou"];
+      pwInput.addEventListener('input', function() {
+        const val = pwInput.value;
+        // Length
+        if (val.length >= 8) {
+          lengthLi.classList.add('text-green-600');
+          lengthLi.classList.remove('text-gray-500');
+          lengthLi.querySelector('.pw-icon').textContent = '✔️';
+          lengthLi.querySelector('.pw-icon').classList.add('pw-checked');
+        } else {
+          lengthLi.classList.remove('text-green-600');
+          lengthLi.classList.add('text-gray-500');
+          lengthLi.querySelector('.pw-icon').textContent = '⚪';
+          lengthLi.querySelector('.pw-icon').classList.remove('pw-checked');
+        }
+        // Common password
+        if (val && !commonPasswords.includes(val.toLowerCase())) {
+          commonLi.classList.add('text-green-600');
+          commonLi.classList.remove('text-gray-500');
+          commonLi.querySelector('.pw-icon').textContent = '✔️';
+          commonLi.querySelector('.pw-icon').classList.add('pw-checked');
+        } else {
+          commonLi.classList.remove('text-green-600');
+          commonLi.classList.add('text-gray-500');
+          commonLi.querySelector('.pw-icon').textContent = '⚪';
+          commonLi.querySelector('.pw-icon').classList.remove('pw-checked');
+        }
+        // Not entirely numeric
+        if (val && !/^\d+$/.test(val)) {
+          numericLi.classList.add('text-green-600');
+          numericLi.classList.remove('text-gray-500');
+          numericLi.querySelector('.pw-icon').textContent = '✔️';
+          numericLi.querySelector('.pw-icon').classList.add('pw-checked');
+        } else {
+          numericLi.classList.remove('text-green-600');
+          numericLi.classList.add('text-gray-500');
+          numericLi.querySelector('.pw-icon').textContent = '⚪';
+          numericLi.querySelector('.pw-icon').classList.remove('pw-checked');
+        }
+      });
+    });
+    </script>
+{% endblock %} 

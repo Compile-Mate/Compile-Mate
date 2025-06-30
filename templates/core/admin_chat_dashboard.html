@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Support Dashboard - CompileMate{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Support Dashboard</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">Manage support chats and help users</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Chats</p>
+                        <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ total_chats }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-2 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
+                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Open Chats</p>
+                        <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ open_chats }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">In Progress</p>
+                        <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ in_progress_chats }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                <div class="flex items-center">
+                    <div class="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Resolved Today</p>
+                        <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ resolved_today }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Status -->
+        {% if admin_availability %}
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Your Status</h3>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        {% if admin_availability.is_online %}
+                            <span class="text-green-600">● Online</span>
+                        {% else %}
+                            <span class="text-red-600">● Offline</span>
+                        {% endif %}
+                        - {{ admin_availability.current_chats }}/{{ admin_availability.max_concurrent_chats }} chats
+                    </p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="toggleOnlineStatus()" 
+                            class="px-4 py-2 rounded-lg {% if admin_availability.is_online %}bg-red-600 hover:bg-red-700{% else %}bg-green-600 hover:bg-green-700{% endif %} text-white font-medium transition-colors">
+                        {% if admin_availability.is_online %}Go Offline{% else %}Go Online{% endif %}
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Recent Chats -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Recent Chats</h3>
+                    <a href="{% url 'core:admin_chat_list' %}" 
+                       class="text-primary-600 hover:text-primary-700 font-medium">
+                        View All →
+                    </a>
+                </div>
+            </div>
+            
+            <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                {% if recent_chats %}
+                    {% for chat in recent_chats %}
+                    <div class="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <h4 class="text-lg font-medium text-gray-900 dark:text-white">
+                                        <a href="{% url 'core:admin_chat_detail' chat.id %}" class="hover:text-primary-600">
+                                            {{ chat.subject }}
+                                        </a>
+                                    </h4>
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full
+                                        {% if chat.status == 'open' %}bg-yellow-100 text-yellow-800
+                                        {% elif chat.status == 'in_progress' %}bg-blue-100 text-blue-800
+                                        {% elif chat.status == 'resolved' %}bg-green-100 text-green-800
+                                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                        {{ chat.get_status_display }}
+                                    </span>
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full
+                                        {% if chat.priority == 'urgent' %}bg-red-100 text-red-800
+                                        {% elif chat.priority == 'high' %}bg-orange-100 text-orange-800
+                                        {% elif chat.priority == 'medium' %}bg-yellow-100 text-yellow-800
+                                        {% else %}bg-green-100 text-green-800{% endif %}">
+                                        {{ chat.get_priority_display }}
+                                    </span>
+                                </div>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm mb-2">{{ chat.description|truncatewords:20 }}</p>
+                                <div class="flex items-center gap-4 text-sm text-gray-500">
+                                    <span>By: {{ chat.user.username }}</span>
+                                    <span>Category: {{ chat.get_category_display }}</span>
+                                    <span>{{ chat.created_at|timesince }} ago</span>
+                                    {% if chat.admin %}
+                                    <span>Assigned to: {{ chat.admin.username }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                {% if not chat.admin %}
+                                <button onclick="assignChat({{ chat.id }})" 
+                                        class="px-3 py-1 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded-lg transition-colors">
+                                    Assign
+                                </button>
+                                {% endif %}
+                                <a href="{% url 'core:admin_chat_detail' chat.id %}" 
+                                   class="px-3 py-1 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                    View
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="p-12 text-center">
+                        <div class="text-6xl mb-4">🎉</div>
+                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">No active chats</h3>
+                        <p class="text-gray-600 dark:text-gray-400">All caught up! No pending support requests.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleOnlineStatus() {
+    // Implement online/offline toggle
+    fetch('/admin/support/toggle-status/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function assignChat(chatId) {
+    fetch(`/admin/support/${chatId}/assign/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+</script>
+{% endblock %} 
