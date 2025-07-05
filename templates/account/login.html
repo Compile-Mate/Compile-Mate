@@ -5,11 +5,10 @@
 {% block head_title %}{% trans "Sign In" %}{% endblock %}
 
 {% block inner_content %}
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 py-8">
-    <div class="relative w-full max-w-md mx-auto">
-        <!-- Animated background shapes -->
-        <div class="absolute -top-10 -left-10 w-32 h-32 bg-blue-200 rounded-full opacity-30 animate-pulse"></div>
-        <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-purple-200 rounded-full opacity-20 animate-pulse"></div>
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 py-8 relative overflow-hidden">
+    <!-- Lottie Animated Background -->
+    <lottie-player src="https://assets2.lottiefiles.com/packages/lf20_2ks3pjua.json" background="transparent" speed="1" style="position:absolute;top:0;left:0;width:100vw;height:100vh;z-index:0;opacity:0.15;pointer-events:none;" loop autoplay></lottie-player>
+    <div class="relative w-full max-w-md mx-auto z-10">
         <div class="relative z-10 bg-white/90 dark:bg-gray-900/90 rounded-3xl shadow-2xl p-10">
             <div class="flex flex-col items-center mb-8">
                 <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-full p-4 shadow-lg mb-4 animate-bounce">
@@ -18,15 +17,15 @@
                     </svg>
                 </div>
                 <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white mb-2">Welcome back</h2>
-                <p class="text-gray-600 dark:text-gray-300">Sign in to your CompileMate account</p>
+                <p class="text-gray-600 dark:text-gray-300" id="motivational-quote">Keep pushing your limits!</p>
             </div>
             <!-- Google Auth Button (always visible) -->
             {% get_providers as socialaccount_providers %}
             {% for provider in socialaccount_providers %}
                 {% if provider.id == "google" %}
                 <div class="mb-6">
-                    <a href="{% provider_login_url provider.id %}" class="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-gray-200 rounded-lg shadow-sm bg-white hover:bg-gray-50 transition-colors duration-200 font-semibold text-lg text-gray-700 animate-fade-in-up focus:ring-2 focus:ring-blue-400">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Logo_2013_Google.png" alt="Google" class="w-6 h-6"> Continue with Google
+                    <a href="{% provider_login_url provider.id %}" class="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-gray-200 rounded-lg shadow-sm bg-white hover:bg-gray-50 transition-colors duration-200 font-semibold text-lg text-gray-700 animate-fade-in-up focus:ring-2 focus:ring-blue-400 google-btn">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Logo_2013_Google.png" alt="Google" class="w-6 h-6 animate-spin-slow"> Continue with Google
                     </a>
                 </div>
                 {% endif %}
@@ -36,10 +35,10 @@
                 <span class="mx-4 text-gray-400 font-medium">or</span>
                 <div class="flex-grow border-t border-gray-300"></div>
             </div>
-            <form class="login space-y-6 animate-fade-in-up delay-200" method="post" action="{% url 'account_login' %}">
+            <form class="login space-y-6 animate-fade-in-up delay-200" method="post" action="{% url 'account_login' %}" id="login-form">
                 {% csrf_token %}
                 {% if form.errors %}
-                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 animate-shake">
                     <div class="text-red-800 text-sm">
                         {% for field in form %}
                             {% for error in field.errors %}
@@ -54,17 +53,12 @@
                 {% endif %}
                 {% for field in form %}
                 <div class="relative group">
-                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        {{ field.label }}
-                    </label>
-                    <div class="relative">
-                        {{ field }}
-                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary-600 transition-colors">
-                            {% if field.label == 'Password' %}🔑{% elif field.label == 'Email' %}📧{% endif %}
-                        </span>
-                    </div>
-                    {% if field.help_text %}
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ field.help_text }}</p>
+                    <input id="{{ field.id_for_label }}" name="{{ field.html_name }}" type="{{ field.field.widget.input_type }}" class="peer block w-full px-4 py-3 bg-transparent border-b-2 border-gray-300 focus:border-blue-600 text-gray-900 dark:text-white focus:outline-none transition-all" placeholder=" " {% if field.field.required %}required{% endif %} autocomplete="{{ field.html_name }}" />
+                    <label for="{{ field.id_for_label }}" class="absolute left-4 top-3 text-gray-500 dark:text-gray-400 text-base transition-all peer-focus:-top-5 peer-focus:text-xs peer-focus:text-blue-600 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 pointer-events-none">{{ field.label }}</label>
+                    {% if field.label == 'Password' %}
+                    <button type="button" class="absolute right-4 top-3 text-gray-400 hover:text-blue-600 focus:outline-none password-toggle" tabindex="-1">
+                        <span class="toggle-icon">👁️</span>
+                    </button>
                     {% endif %}
                 </div>
                 {% endfor %}
@@ -116,5 +110,51 @@
   50% { transform: translateY(-10px); }
 }
 .animate-bounce { animation: bounce 2s infinite; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+.animate-shake { animation: shake 0.5s; }
+.google-btn img { transition: transform 2s linear; }
+.google-btn:hover img { transform: rotate(360deg); }
 </style>
+<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+<script>
+// Rotating motivational quotes
+const quotes = [
+  "Keep pushing your limits!",
+  "Every bug is an opportunity to learn.",
+  "Code. Debug. Repeat.",
+  "Dream in algorithms.",
+  "You are one step closer to mastery!",
+  "Great things never come from comfort zones.",
+  "Consistency beats intensity!"
+];
+let quoteIdx = 0;
+setInterval(() => {
+  quoteIdx = (quoteIdx + 1) % quotes.length;
+  document.getElementById('motivational-quote').textContent = quotes[quoteIdx];
+}, 4000);
+// Password visibility toggle
+for (const btn of document.querySelectorAll('.password-toggle')) {
+  btn.addEventListener('click', function() {
+    const input = btn.parentElement.querySelector('input');
+    if (input.type === 'password') {
+      input.type = 'text';
+      btn.querySelector('.toggle-icon').textContent = '🙈';
+    } else {
+      input.type = 'password';
+      btn.querySelector('.toggle-icon').textContent = '👁️';
+    }
+  });
+}
+// Success/failure animation on submit
+const form = document.getElementById('login-form');
+if (form) {
+  form.addEventListener('submit', function() {
+    form.classList.add('animate-fade-in-up');
+  });
+}
+</script>
 {% endblock %} 
