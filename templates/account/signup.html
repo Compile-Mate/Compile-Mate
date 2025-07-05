@@ -5,11 +5,10 @@
 {% block head_title %}{% trans "Sign Up" %}{% endblock %}
 
 {% block inner_content %}
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-400 via-teal-500 to-blue-500 py-8">
-    <div class="relative w-full max-w-md mx-auto">
-        <!-- Animated background shapes -->
-        <div class="absolute -top-10 -left-10 w-32 h-32 bg-green-200 rounded-full opacity-30 animate-pulse"></div>
-        <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-200 rounded-full opacity-20 animate-pulse"></div>
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-400 via-teal-500 to-blue-500 py-8 relative overflow-hidden">
+    <!-- Lottie Animated Background -->
+    <lottie-player src="https://assets2.lottiefiles.com/packages/lf20_2ks3pjua.json" background="transparent" speed="1" style="position:absolute;top:0;left:0;width:100vw;height:100vh;z-index:0;opacity:0.15;pointer-events:none;" loop autoplay></lottie-player>
+    <div class="relative w-full max-w-md mx-auto z-10">
         <div class="relative z-10 bg-white/90 dark:bg-gray-900/90 rounded-3xl shadow-2xl p-10">
             <div class="flex flex-col items-center mb-8">
                 <div class="bg-gradient-to-r from-green-600 to-teal-600 rounded-full p-4 shadow-lg mb-4 animate-bounce">
@@ -18,15 +17,15 @@
                     </svg>
                 </div>
                 <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white mb-2">Join CompileMate</h2>
-                <p class="text-gray-600 dark:text-gray-300">Start your competitive programming journey today</p>
+                <p class="text-gray-600 dark:text-gray-300" id="motivational-tip">Start your competitive programming journey today</p>
             </div>
             <!-- Google Auth Button (always visible) -->
             {% get_providers as socialaccount_providers %}
             {% for provider in socialaccount_providers %}
                 {% if provider.id == "google" %}
                 <div class="mb-6">
-                    <a href="{% provider_login_url provider.id %}" class="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-gray-200 rounded-lg shadow-sm bg-white hover:bg-gray-50 transition-colors duration-200 font-semibold text-lg text-gray-700 animate-fade-in-up focus:ring-2 focus:ring-green-400">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Logo_2013_Google.png" alt="Google" class="w-6 h-6"> Sign up with Google
+                    <a href="{% provider_login_url provider.id %}" class="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-gray-200 rounded-lg shadow-sm bg-white hover:bg-gray-50 transition-colors duration-200 font-semibold text-lg text-gray-700 animate-fade-in-up focus:ring-2 focus:ring-green-400 google-btn">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Logo_2013_Google.png" alt="Google" class="w-6 h-6 animate-spin-slow"> Sign up with Google
                     </a>
                 </div>
                 {% endif %}
@@ -42,7 +41,7 @@
             <form class="signup space-y-6 animate-fade-in-up delay-300" id="signup_form" method="post" action="{% url 'account_signup' %}">
                 {% csrf_token %}
                 {% if form.errors %}
-                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 animate-shake">
                     <div class="text-red-800 text-sm">
                         {% for field in form %}
                             {% for error in field.errors %}
@@ -57,17 +56,18 @@
                 {% endif %}
                 {% for field in form %}
                 <div class="relative group">
-                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        {{ field.label }}
-                    </label>
-                    <div class="relative">
-                        {{ field }}
-                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-green-600 transition-colors">
-                            {% if field.label == 'Password' %}🔑{% elif field.label == 'Email' %}📧{% endif %}
-                        </span>
-                    </div>
+                    <input id="{{ field.id_for_label }}" name="{{ field.html_name }}" type="{{ field.field.widget.input_type }}" class="peer block w-full px-4 py-3 bg-transparent border-b-2 border-gray-300 focus:border-green-600 text-gray-900 dark:text-white focus:outline-none transition-all" placeholder=" " {% if field.field.required %}required{% endif %} autocomplete="{{ field.html_name }}" />
+                    <label for="{{ field.id_for_label }}" class="absolute left-4 top-3 text-gray-500 dark:text-gray-400 text-base transition-all peer-focus:-top-5 peer-focus:text-xs peer-focus:text-green-600 peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 pointer-events-none">{{ field.label }}</label>
+                    {% if field.label == 'Password' or field.label == 'Password1' %}
+                    <button type="button" class="absolute right-4 top-3 text-gray-400 hover:text-green-600 focus:outline-none password-toggle" tabindex="-1">
+                        <span class="toggle-icon">👁️</span>
+                    </button>
+                    {% endif %}
                     {% if field.name == 'password1' %}
-                    <!-- Live Password Checklist -->
+                    <!-- Live Password Strength Meter -->
+                    <div class="w-full h-2 mt-2 rounded bg-gray-200 dark:bg-gray-700">
+                        <div id="pw-strength-bar" class="h-2 rounded bg-red-400 transition-all" style="width:0%"></div>
+                    </div>
                     <ul id="password-checklist" class="mt-2 space-y-1 text-sm">
                         <li id="pw-length" class="flex items-center gap-2 text-gray-500 transition-all"><span class="pw-icon">⚪</span> At least 8 characters</li>
                         <li id="pw-common" class="flex items-center gap-2 text-gray-500 transition-all"><span class="pw-icon">⚪</span> Not a common password</li>
@@ -94,72 +94,81 @@
                     <a href="#" class="text-blue-600 hover:text-blue-500">Privacy Policy</a>
                 </p>
             </div>
-            </div>
         </div>
     </div>
-    <style>
-    @keyframes fade-in-up {
-      0% { opacity: 0; transform: translateY(40px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fade-in-up { animation: fade-in-up 1s cubic-bezier(0.4,0,0.2,1) both; }
-    .animate-fade-in-up.delay-200 { animation-delay: 0.2s; }
-    .animate-fade-in-up.delay-300 { animation-delay: 0.3s; }
-    .animate-fade-in-up.delay-400 { animation-delay: 0.4s; }
+</div>
+<style>
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(40px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up { animation: fade-in-up 1s cubic-bezier(0.4,0,0.2,1) both; }
+.animate-fade-in-up.delay-200 { animation-delay: 0.2s; }
+.animate-fade-in-up.delay-300 { animation-delay: 0.3s; }
+.animate-fade-in-up.delay-400 { animation-delay: 0.4s; }
 @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
 .animate-bounce { animation: bounce 2s infinite; }
-    </style>
-    <script>
-    // Live password checklist animation
-    document.addEventListener('DOMContentLoaded', function() {
-      const pwInput = document.querySelector('input[name="password1"]');
-      if (!pwInput) return;
-      const lengthLi = document.getElementById('pw-length');
-      const commonLi = document.getElementById('pw-common');
-      const numericLi = document.getElementById('pw-numeric');
-      const commonPasswords = ["password", "12345678", "qwerty", "letmein", "admin", "welcome", "iloveyou"];
-      pwInput.addEventListener('input', function() {
-        const val = pwInput.value;
-        // Length
-        if (val.length >= 8) {
-          lengthLi.classList.add('text-green-600');
-          lengthLi.classList.remove('text-gray-500');
-          lengthLi.querySelector('.pw-icon').textContent = '✔️';
-          lengthLi.querySelector('.pw-icon').classList.add('pw-checked');
-        } else {
-          lengthLi.classList.remove('text-green-600');
-          lengthLi.classList.add('text-gray-500');
-          lengthLi.querySelector('.pw-icon').textContent = '⚪';
-          lengthLi.querySelector('.pw-icon').classList.remove('pw-checked');
-        }
-        // Common password
-        if (val && !commonPasswords.includes(val.toLowerCase())) {
-          commonLi.classList.add('text-green-600');
-          commonLi.classList.remove('text-gray-500');
-          commonLi.querySelector('.pw-icon').textContent = '✔️';
-          commonLi.querySelector('.pw-icon').classList.add('pw-checked');
-        } else {
-          commonLi.classList.remove('text-green-600');
-          commonLi.classList.add('text-gray-500');
-          commonLi.querySelector('.pw-icon').textContent = '⚪';
-          commonLi.querySelector('.pw-icon').classList.remove('pw-checked');
-        }
-        // Not entirely numeric
-        if (val && !/^\d+$/.test(val)) {
-          numericLi.classList.add('text-green-600');
-          numericLi.classList.remove('text-gray-500');
-          numericLi.querySelector('.pw-icon').textContent = '✔️';
-          numericLi.querySelector('.pw-icon').classList.add('pw-checked');
-        } else {
-          numericLi.classList.remove('text-green-600');
-          numericLi.classList.add('text-gray-500');
-          numericLi.querySelector('.pw-icon').textContent = '⚪';
-          numericLi.querySelector('.pw-icon').classList.remove('pw-checked');
-        }
-      });
-    });
-    </script>
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+.animate-shake { animation: shake 0.5s; }
+.google-btn img { transition: transform 2s linear; }
+.google-btn:hover img { transform: rotate(360deg); }
+</style>
+<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+<script>
+// Rotating motivational tips
+const tips = [
+  "Start your journey with a strong password!",
+  "Consistency is the key to mastery.",
+  "Every coder was once a beginner.",
+  "Debugging is twice as hard as writing the code in the first place.",
+  "Celebrate small wins!",
+  "You are building your future, one line at a time."
+];
+let tipIdx = 0;
+setInterval(() => {
+  tipIdx = (tipIdx + 1) % tips.length;
+  document.getElementById('motivational-tip').textContent = tips[tipIdx];
+}, 4000);
+// Password visibility toggle
+for (const btn of document.querySelectorAll('.password-toggle')) {
+  btn.addEventListener('click', function() {
+    const input = btn.parentElement.querySelector('input');
+    if (input.type === 'password') {
+      input.type = 'text';
+      btn.querySelector('.toggle-icon').textContent = '🙈';
+    } else {
+      input.type = 'password';
+      btn.querySelector('.toggle-icon').textContent = '👁️';
+    }
+  });
+}
+// Live password strength meter
+const pwInput = document.querySelector('input[name="password1"]');
+const pwBar = document.getElementById('pw-strength-bar');
+if (pwInput && pwBar) {
+  pwInput.addEventListener('input', function() {
+    const val = pwInput.value;
+    let score = 0;
+    if (val.length >= 8) score += 1;
+    if (!['password', '12345678', 'qwerty', 'letmein', 'admin', 'welcome', 'iloveyou'].includes(val.toLowerCase())) score += 1;
+    if (val && !/^\d+$/.test(val)) score += 1;
+    pwBar.style.width = (score * 33.3) + '%';
+    pwBar.className = 'h-2 rounded transition-all ' + (score === 3 ? 'bg-green-500' : score === 2 ? 'bg-yellow-400' : 'bg-red-400');
+  });
+}
+// Success/failure animation on submit
+const form = document.getElementById('signup_form');
+if (form) {
+  form.addEventListener('submit', function() {
+    form.classList.add('animate-fade-in-up');
+  });
+}
+</script>
 {% endblock %} 
