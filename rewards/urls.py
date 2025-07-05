@@ -2,6 +2,7 @@ from django.urls import path
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render
+from .views import user_rewards_dashboard
 # from . import views
 
 app_name = 'rewards'
@@ -24,7 +25,7 @@ urlpatterns = [
     # path('vouchers/<int:pk>/redeem/', login_required(views.VoucherRedeemView.as_view()), name='voucher_redeem'),
     
     # User rewards
-    path('my-rewards/', login_required(user_rewards_placeholder), name='user_rewards'),
+    path('my-rewards/', login_required(user_rewards_dashboard), name='user_rewards'),
     # path('transactions/', login_required(views.TransactionHistoryView.as_view()), name='transaction_history'),
     
     # Daily rewards
