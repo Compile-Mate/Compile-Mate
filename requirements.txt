@@ -1,0 +1,118 @@
+# Core Django Stack
+Django==4.2.7
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+django-allauth==0.57.0
+django-environ==0.11.2
+python-decouple==3.8
+requests==2.31.0
+Pillow>=10.3.0
+sqlparse==0.5.3
+tzdata==2025.2
+
+# Frontend Integration (Tailwind / HTMX)
+django-crispy-forms==2.1
+crispy-tailwind==0.5.0
+django-htmx==1.17.2
+django-tailwind==3.8.0
+django-browser-reload==1.12.1
+
+# Developer Utilities
+django-debug-toolbar==4.2.0
+django-extensions==3.2.3
+
+# Filters, Rate Limiting, and Caching
+django-filter==23.5
+django-ratelimit==4.1.0
+django-cacheops==7.2
+redis==5.0.1
+
+# Task Queues and Background Jobs
+celery==5.3.4
+django-celery-beat==2.5.0
+django-celery-results==2.5.1
+
+# PostgreSQL adapter (modern & Python 3.13 compatible)
+psycopg2-binary==2.9.9
+
+# Production Tools
+gunicorn==21.2.0
+whitenoise==6.6.0
+dj-database-url==2.1.0
+
+# Real-time / WebSocket Support
+channels==4.0.0
+channels-redis==4.1.0
+
+# Code Execution Engine
+docker==7.1.0
+
+# Resume Scanner / ATS Analysis
+PyPDF2==3.0.1
+python-docx==1.1.0
+
+# AI & Machine Learning
+openai==1.6.1
+anthropic==0.8.0
+
+# Two-Factor Authentication
+django-otp==1.3.0
+qrcode[pil]==7.4.2
+pyotp==2.9.0
+
+# Payment Integration
+stripe==7.9.0
+
+# PWA Support
+django-pwa==1.1.0
+
+# PDF Generation & Certificates
+reportlab==4.0.7
+weasyprint==60.2
+PyPDF2==3.0.1
+
+# Internationalization
+django-rosetta==0.9.9
+polib==1.2.0
+
+# Image Processing
+Pillow>=10.3.0
+
+# Charts & Visualizations (for analytics)
+matplotlib==3.8.2
+seaborn==0.13.0
+
+# Email & Notifications
+sendgrid==6.11.0
+
+# Monitoring & Analytics
+sentry-sdk==1.39.2
+
+# OAuth & Social Auth (already included in allauth)
+# Additional providers can be added via django-allauth
+
+# Blockchain (optional, for certificate verification)
+web3==6.15.0
+
+# Markdown Support
+markdown==3.5.1
+bleach==6.1.0
+
+# Code Formatting & Linting (for snippet validation)
+black==23.12.1
+autopep8==2.0.4
+
+# Data Validation
+pydantic==2.5.3
+
+# Utility Libraries
+python-slugify==8.0.1
+python-dateutil==2.8.2
+humanize==4.9.0
+
+# Testing (for production readiness)
+pytest==7.4.3
+pytest-django==4.7.0
+pytest-cov==4.1.0
+factory-boy==3.3.0
+faker==22.0.0
