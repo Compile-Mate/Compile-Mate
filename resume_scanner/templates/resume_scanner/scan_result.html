@@ -1,0 +1,296 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Resume Analysis Results{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-12 px-4">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header with Score -->
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-2xl p-8 md:p-12 text-white mb-8">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                    <a href="{% url 'resume_scanner:upload_resume' %}" class="inline-flex items-center gap-2 text-indigo-100 hover:text-white mb-4 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        </svg>
+                        Back to Scanner
+                    </a>
+                    <h1 class="text-3xl md:text-4xl font-extrabold mb-2">Resume Analysis Complete!</h1>
+                    <p class="text-indigo-100">{{ scan.job_field|default:"General Analysis" }} • {{ scan.uploaded_at|date:"M d, Y" }}</p>
+                </div>
+                <div class="text-center">
+                    <div class="relative inline-block">
+                        <svg class="w-32 h-32" viewBox="0 0 36 36">
+                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                  fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="3"/>
+                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                  fill="none" stroke="white" stroke-width="3"
+                                  stroke-dasharray="{{ overall_score }}, 100"/>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div>
+                                <p class="text-5xl font-extrabold">{{ overall_score|floatformat:0 }}</p>
+                                <p class="text-sm">Overall</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-2 text-2xl font-bold">{{ scan.score_grade }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Score Breakdown -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-semibold text-gray-600">ATS Score</h3>
+                    <span class="text-2xl">🤖</span>
+                </div>
+                <p class="text-4xl font-bold {% if scan.ats_score >= 80 %}text-green-600{% elif scan.ats_score >= 60 %}text-yellow-600{% else %}text-red-600{% endif %}">
+                    {{ scan.ats_score|floatformat:0 }}
+                </p>
+                <div class="mt-3 w-full bg-gray-200 rounded-full h-2">
+                    <div class="{% if scan.ats_score >= 80 %}bg-green-500{% elif scan.ats_score >= 60 %}bg-yellow-500{% else %}bg-red-500{% endif %} h-2 rounded-full" 
+                         style="width: {{ scan.ats_score }}%"></div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-semibold text-gray-600">Keywords</h3>
+                    <span class="text-2xl">🔑</span>
+                </div>
+                <p class="text-4xl font-bold {% if scan.keyword_score >= 80 %}text-green-600{% elif scan.keyword_score >= 60 %}text-yellow-600{% else %}text-red-600{% endif %}">
+                    {{ scan.keyword_score|floatformat:0 }}
+                </p>
+                <div class="mt-3 w-full bg-gray-200 rounded-full h-2">
+                    <div class="{% if scan.keyword_score >= 80 %}bg-green-500{% elif scan.keyword_score >= 60 %}bg-yellow-500{% else %}bg-red-500{% endif %} h-2 rounded-full" 
+                         style="width: {{ scan.keyword_score }}%"></div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-semibold text-gray-600">Format</h3>
+                    <span class="text-2xl">📄</span>
+                </div>
+                <p class="text-4xl font-bold {% if format_score >= 80 %}text-green-600{% elif format_score >= 60 %}text-yellow-600{% else %}text-red-600{% endif %}">
+                    {{ format_score|floatformat:0 }}
+                </p>
+                <div class="mt-3 w-full bg-gray-200 rounded-full h-2">
+                    <div class="{% if format_score >= 80 %}bg-green-500{% elif format_score >= 60 %}bg-yellow-500{% else %}bg-red-500{% endif %} h-2 rounded-full" 
+                         style="width: {{ format_score }}%"></div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-semibold text-gray-600">Content</h3>
+                    <span class="text-2xl">📝</span>
+                </div>
+                <p class="text-4xl font-bold {% if content_score >= 80 %}text-green-600{% elif content_score >= 60 %}text-yellow-600{% else %}text-red-600{% endif %}">
+                    {{ content_score|floatformat:0 }}
+                </p>
+                <div class="mt-3 w-full bg-gray-200 rounded-full h-2">
+                    <div class="{% if content_score >= 80 %}bg-green-500{% elif content_score >= 60 %}bg-yellow-500{% else %}bg-red-500{% endif %} h-2 rounded-full" 
+                         style="width: {{ content_score }}%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Strengths & Weaknesses -->
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">📊 Analysis Overview</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Strengths -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-green-600 mb-4 flex items-center gap-2">
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                Strengths ({{ strengths|length }})
+                            </h3>
+                            {% if strengths %}
+                            <ul class="space-y-2">
+                                {% for strength in strengths %}
+                                <li class="flex items-start gap-2 text-gray-700">
+                                    <span class="text-green-500 mt-1">✓</span>
+                                    <span>{{ strength }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% else %}
+                            <p class="text-gray-500 italic">No significant strengths detected</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Weaknesses -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-red-600 mb-4 flex items-center gap-2">
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                </svg>
+                                Areas to Improve ({{ weaknesses|length }})
+                            </h3>
+                            {% if weaknesses %}
+                            <ul class="space-y-2">
+                                {% for weakness in weaknesses %}
+                                <li class="flex items-start gap-2 text-gray-700">
+                                    <span class="text-red-500 mt-1">✗</span>
+                                    <span>{{ weakness }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% else %}
+                            <p class="text-gray-500 italic">No major weaknesses found - great job!</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Suggestions -->
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                        💡 Actionable Suggestions
+                        <span class="text-sm font-normal text-gray-500">({{ scan.suggestions|length }} items)</span>
+                    </h2>
+                    
+                    {% if scan.suggestions %}
+                    <ol class="space-y-4">
+                        {% for suggestion in scan.suggestions %}
+                        <li class="flex items-start gap-4 p-4 bg-indigo-50 rounded-lg border-l-4 border-indigo-500">
+                            <span class="flex-shrink-0 w-8 h-8 bg-indigo-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                                {{ forloop.counter }}
+                            </span>
+                            <p class="text-gray-700 flex-1">{{ suggestion }}</p>
+                        </li>
+                        {% endfor %}
+                    </ol>
+                    {% else %}
+                    <p class="text-gray-500 italic">Your resume looks great! No major suggestions at this time.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Detailed Report -->
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">📋 Detailed Report</h2>
+                    <pre class="bg-gray-50 p-6 rounded-xl text-sm text-gray-700 overflow-x-auto whitespace-pre-wrap font-mono border border-gray-200">{{ scan.report }}</pre>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Keywords Found -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        🔑 Keywords Found
+                    </h3>
+                    {% if keywords.technical_skills %}
+                    <div class="mb-4">
+                        <h4 class="text-sm font-semibold text-gray-600 mb-2">Technical Skills</h4>
+                        <div class="flex flex-wrap gap-2">
+                            {% for skill in keywords.technical_skills|slice:":15" %}
+                            <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">{{ skill }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if keywords.soft_skills %}
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-600 mb-2">Soft Skills</h4>
+                        <div class="flex flex-wrap gap-2">
+                            {% for skill in keywords.soft_skills|slice:":10" %}
+                            <span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">{{ skill }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Sections Detected -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">📄 Sections Detected</h3>
+                    <div class="space-y-2">
+                        {% for section, found in sections.items %}
+                        <div class="flex items-center justify-between p-3 {% if found %}bg-green-50 border-green-200{% else %}bg-red-50 border-red-200{% endif %} rounded-lg border">
+                            <span class="text-sm font-medium text-gray-700 capitalize">{{ section }}</span>
+                            {% if found %}
+                            <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            {% else %}
+                            <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                            </svg>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">📞 Contact Info</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">📧</span>
+                            <div class="flex-1">
+                                <p class="text-sm text-gray-600">Email</p>
+                                <p class="font-medium {% if contact_info.email %}text-green-600{% else %}text-red-600{% endif %}">
+                                    {% if contact_info.email %}Found{% else %}Missing{% endif %}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">📱</span>
+                            <div class="flex-1">
+                                <p class="text-sm text-gray-600">Phone</p>
+                                <p class="font-medium {% if contact_info.phone %}text-green-600{% else %}text-red-600{% endif %}">
+                                    {% if contact_info.phone %}Found{% else %}Missing{% endif %}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">💼</span>
+                            <div class="flex-1">
+                                <p class="text-sm text-gray-600">LinkedIn</p>
+                                <p class="font-medium {% if contact_info.linkedin %}text-green-600{% else %}text-yellow-600{% endif %}">
+                                    {% if contact_info.linkedin %}Found{% else %}Recommended{% endif %}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">💻</span>
+                            <div class="flex-1">
+                                <p class="text-sm text-gray-600">GitHub</p>
+                                <p class="font-medium {% if contact_info.github %}text-green-600{% else %}text-yellow-600{% endif %}">
+                                    {% if contact_info.github %}Found{% else %}Recommended{% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl shadow-lg p-6 text-white text-center">
+                    <h3 class="text-lg font-bold mb-4">Ready to Apply?</h3>
+                    <p class="text-sm text-indigo-100 mb-6">Fix the issues above and re-scan for best results!</p>
+                    <a href="{% url 'resume_scanner:upload_resume' %}" 
+                       class="block w-full bg-white text-indigo-600 font-bold py-3 px-4 rounded-lg hover:bg-indigo-50 transition-colors">
+                        Scan Another Resume
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

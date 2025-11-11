@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Resume Scanner - ATS Analysis{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-12 px-4">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full mb-4">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
+                AI-Powered Resume Scanner
+            </h1>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                Get instant ATS compatibility analysis and actionable feedback to land your dream job
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Upload Form -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl shadow-xl p-8 md:p-10">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Upload Your Resume</h2>
+                    
+                    <form method="post" enctype="multipart/form-data" class="space-y-6">
+                        {% csrf_token %}
+                        
+                        {% if messages %}
+                        <div class="space-y-2">
+                            {% for message in messages %}
+                            <div class="{% if message.tags == 'success' %}bg-green-50 border-green-500 text-green-800{% else %}bg-red-50 border-red-500 text-red-800{% endif %} border-l-4 p-4 rounded-r-lg">
+                                <p class="font-medium">{{ message }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Resume File Upload -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">
+                                <span class="flex items-center gap-2">
+                                    📄 Resume File (PDF or DOCX)
+                                    <span class="text-red-500">*</span>
+                                </span>
+                            </label>
+                            <div class="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-indigo-400 transition-colors">
+                                <div class="space-y-2 text-center">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    {{ form.resume_file }}
+                                    <p class="text-xs text-gray-500 mt-2">PDF or DOCX up to 10MB</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Job Field -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                💼 Job Title / Field
+                            </label>
+                            <input type="text" name="job_field" placeholder="e.g. Software Engineer, Data Scientist" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                   value="{{ form.job_field.value|default:'' }}">
+                        </div>
+
+                        <!-- Job Description -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                📝 Job Description (Optional but Recommended)
+                            </label>
+                            <textarea name="job_description" rows="6" 
+                                      placeholder="Paste the job description here for better keyword matching..."
+                                      class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">{{ form.job_description.value|default:'' }}</textarea>
+                            <p class="text-xs text-gray-500 mt-1">💡 Adding a job description improves keyword matching accuracy</p>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" 
+                                class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                            </svg>
+                            Analyze Resume
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Previous Scans -->
+                {% if previous_scans %}
+                <div class="mt-8 bg-white rounded-2xl shadow-xl p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">📊 Recent Scans</h3>
+                    <div class="space-y-3">
+                        {% for scan in previous_scans %}
+                        <a href="{% url 'resume_scanner:scan_result' scan.id %}" 
+                           class="block p-4 border border-gray-200 rounded-xl hover:border-indigo-400 hover:shadow-md transition-all">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-semibold text-gray-900">{{ scan.job_field|default:"General Analysis" }}</p>
+                                    <p class="text-sm text-gray-500">{{ scan.uploaded_at|date:"M d, Y - g:i A" }}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-2xl font-bold {% if scan.ats_score >= 80 %}text-green-600{% elif scan.ats_score >= 60 %}text-yellow-600{% else %}text-red-600{% endif %}">
+                                        {{ scan.ats_score|floatformat:0 }}
+                                    </p>
+                                    <p class="text-xs text-gray-500">ATS Score</p>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Features Sidebar -->
+            <div class="lg:col-span-1">
+                <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl shadow-xl p-6 text-white sticky top-4">
+                    <h3 class="text-xl font-bold mb-6">What You'll Get</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-semibold">ATS Compatibility Score</p>
+                                <p class="text-sm text-indigo-100">See how well your resume parses through Applicant Tracking Systems</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-semibold">Keyword Analysis</p>
+                                <p class="text-sm text-indigo-100">Match your resume against job description keywords</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-semibold">Format Check</p>
+                                <p class="text-sm text-indigo-100">Identify formatting issues that block ATS systems</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-semibold">Actionable Suggestions</p>
+                                <p class="text-sm text-indigo-100">Get specific improvements to boost your score</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-semibold">Detailed Report</p>
+                                <p class="text-sm text-indigo-100">Comprehensive breakdown of all metrics</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 p-4 bg-white/10 rounded-xl backdrop-blur-sm">
+                        <p class="text-sm text-center">
+                            💡 <strong>Pro Tip:</strong> Include a job description for best results!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
