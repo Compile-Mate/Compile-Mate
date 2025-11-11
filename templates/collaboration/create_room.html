@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Create Room - CompileMate{% endblock %}
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8">
+    <div class="max-w-2xl mx-auto px-4">
+        <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-8">Create Collaboration Room</h1>
+        
+        <form method="POST" class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+            {% csrf_token %}
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Room Name</label>
+                <input type="text" name="name" required placeholder="My Awesome Room" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-xl focus:ring-2 focus:ring-orange-500">
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Room Type</label>
+                <select name="room_type" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-xl">
+                    <option value="full">Full Suite (Video + Whiteboard + Coding + Screen Share)</option>
+                    <option value="video">Video Call Only</option>
+                    <option value="whiteboard">Whiteboard Only</option>
+                    <option value="coding">Live Coding Only</option>
+                </select>
+            </div>
+            
+            <div class="flex gap-4">
+                <a href="{% url 'collaboration:list' %}" class="flex-1 text-center bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-6 py-3 rounded-xl font-semibold hover:bg-gray-300 transition">Cancel</a>
+                <button type="submit" class="flex-1 bg-gradient-to-r from-orange-600 to-amber-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-orange-700 hover:to-amber-700 transition">
+                    Create Room 🎉
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

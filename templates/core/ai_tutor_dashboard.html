@@ -1,0 +1,529 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}AI Code Tutor - CompileMate{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900 py-12">
+    <div class="max-w-7xl mx-auto px-4">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <div class="inline-block mb-4 animate-bounce">
+                <span class="text-8xl">🤖</span>
+            </div>
+            <h1 class="text-6xl font-black mb-4 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
+                AI Code Tutor
+            </h1>
+            <p class="text-xl text-gray-600 dark:text-gray-400 mb-6">
+                Get AI-powered help for any problem you're working on
+            </p>
+            <div class="flex items-center justify-center gap-6">
+                <div class="inline-flex items-center gap-3 bg-yellow-100 dark:bg-yellow-900/30 px-8 py-4 rounded-2xl border-2 border-yellow-400 dark:border-yellow-600 shadow-xl">
+                    <span class="text-3xl">🪙</span>
+                    <div class="text-left">
+                        <div class="text-sm text-gray-600 dark:text-gray-400 font-semibold">Your Balance</div>
+                        <div id="user-coins" class="text-3xl font-black text-gray-900 dark:text-white">{{ user_coins }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Problem Selector -->
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 p-8 mb-12">
+            <h2 class="text-3xl font-black text-gray-900 dark:text-white mb-6 flex items-center gap-3">
+                <span class="text-4xl">🎯</span>
+                Select a Problem
+            </h2>
+            
+            <!-- Search -->
+            <div class="mb-6">
+                <input 
+                    type="text" 
+                    id="problem-search" 
+                    placeholder="Search problems..."
+                    class="w-full px-6 py-4 bg-white dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 dark:text-white text-lg transition-all"
+                >
+            </div>
+            
+            <!-- Problem List -->
+            <div id="problem-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto custom-scroll">
+                <div class="text-center py-12 col-span-full">
+                    <div class="text-5xl mb-4">⏳</div>
+                    <p class="text-gray-600 dark:text-gray-400">Loading problems...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Selected Problem & AI Tools -->
+        <div id="ai-tools-section" class="hidden">
+            <!-- Selected Problem Info -->
+            <div class="bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl p-8 shadow-2xl mb-8 text-white">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="text-sm opacity-80 mb-2">Selected Problem</div>
+                        <h3 id="selected-problem-title" class="text-4xl font-black mb-3"></h3>
+                        <div class="flex items-center gap-4">
+                            <span id="selected-problem-difficulty" class="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-xl text-sm font-bold"></span>
+                            <a id="selected-problem-link" href="#" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl text-sm font-bold transition-all">
+                                <span>📝</span>
+                                <span>View Problem</span>
+                            </a>
+                        </div>
+                    </div>
+                    <button onclick="clearSelection()" class="px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl font-bold transition-all">
+                        ✕ Clear
+                    </button>
+                </div>
+            </div>
+            
+            <!-- AI Features Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <!-- Get Hint -->
+                <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl border-2 border-purple-300 dark:border-purple-700 shadow-2xl p-8 hover:scale-105 transition-transform duration-300">
+                    <div class="text-center mb-6">
+                        <div class="text-7xl mb-4">💡</div>
+                        <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-2">Get Smart Hint</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-4">Progressive hints that guide you without spoiling the solution</p>
+                        <div class="bg-purple-100 dark:bg-purple-900/30 px-4 py-2 rounded-full inline-block mb-6">
+                            <span class="font-bold text-purple-900 dark:text-purple-300 text-lg">{{ hint_cost }} coins</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Hint Level Selector -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Hint Level</label>
+                        <select id="hint-level" class="w-full px-4 py-3 bg-white dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white font-semibold">
+                            <option value="1">Level 1 - Gentle nudge</option>
+                            <option value="2">Level 2 - More specific</option>
+                            <option value="3">Level 3 - Detailed guidance</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Code Input -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Your Code (Optional)</label>
+                        <textarea id="hint-code" rows="4" placeholder="Paste your current code here..." class="w-full px-4 py-3 bg-white dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white font-mono text-sm resize-none"></textarea>
+                    </div>
+                    
+                    <button onclick="getHint()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                        💡 Get Hint
+                    </button>
+                </div>
+
+                <!-- Explain Error -->
+                <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl border-2 border-red-300 dark:border-red-700 shadow-2xl p-8 hover:scale-105 transition-transform duration-300">
+                    <div class="text-center mb-6">
+                        <div class="text-7xl mb-4">🔍</div>
+                        <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-2">Explain Error</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-4">Understand what went wrong and how to fix it</p>
+                        <div class="bg-green-100 dark:bg-green-900/30 px-4 py-2 rounded-full inline-block mb-6">
+                            <span class="font-bold text-green-900 dark:text-green-300 text-lg">FREE</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Language Selector -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Language</label>
+                        <select id="error-language" class="w-full px-4 py-3 bg-white dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white font-semibold">
+                            <option value="python">🐍 Python</option>
+                            <option value="cpp">⚡ C++</option>
+                            <option value="java">☕ Java</option>
+                            <option value="javascript">🟨 JavaScript</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Code Input -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Your Code</label>
+                        <textarea id="error-code" rows="3" placeholder="Paste your code here..." class="w-full px-4 py-3 bg-white dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white font-mono text-sm resize-none"></textarea>
+                    </div>
+                    
+                    <!-- Error Message Input -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Error Message</label>
+                        <textarea id="error-message" rows="2" placeholder="Paste the error message here..." class="w-full px-4 py-3 bg-white dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white font-mono text-sm resize-none"></textarea>
+                    </div>
+                    
+                    <button onclick="explainError()" class="w-full bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                        🔍 Explain Error
+                    </button>
+                </div>
+
+                <!-- Code Review -->
+                <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl border-2 border-blue-300 dark:border-blue-700 shadow-2xl p-8 hover:scale-105 transition-transform duration-300">
+                    <div class="text-center mb-6">
+                        <div class="text-7xl mb-4">⭐</div>
+                        <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-2">Code Review</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-4">Get expert feedback on code quality and optimization</p>
+                        <div class="bg-blue-100 dark:bg-blue-900/30 px-4 py-2 rounded-full inline-block mb-6">
+                            <span class="font-bold text-blue-900 dark:text-blue-300 text-lg">{{ review_cost }} coins</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Language Selector -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Language</label>
+                        <select id="review-language" class="w-full px-4 py-3 bg-white dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white font-semibold">
+                            <option value="python">🐍 Python</option>
+                            <option value="cpp">⚡ C++</option>
+                            <option value="java">☕ Java</option>
+                            <option value="javascript">🟨 JavaScript</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Code Input -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Your Code</label>
+                        <textarea id="review-code" rows="6" placeholder="Paste your solution here..." class="w-full px-4 py-3 bg-white dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white font-mono text-sm resize-none"></textarea>
+                    </div>
+                    
+                    <button onclick="reviewCode()" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                        ⭐ Review Code
+                    </button>
+                </div>
+            </div>
+            
+            <!-- AI Response Display -->
+            <div id="ai-response" class="hidden bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl shadow-2xl border-2 border-purple-300 dark:border-purple-700 p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-3">
+                        <span class="text-4xl">🤖</span>
+                        <span id="ai-response-title">AI Response</span>
+                    </h3>
+                    <button onclick="closeAIResponse()" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-xl font-bold transition-all">
+                        ✕ Close
+                    </button>
+                </div>
+                <div id="ai-response-content" class="prose prose-lg dark:prose-invert max-w-none"></div>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="bg-gradient-to-r from-purple-600 to-blue-600 rounded-3xl p-12 text-white shadow-2xl">
+            <h2 class="text-4xl font-black mb-8 text-center">How to Use AI Tutor</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="bg-white/20 backdrop-blur-lg w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <span class="text-4xl font-black">1</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-2">Select Problem</h3>
+                    <p class="text-purple-100">
+                        Search and select the problem you need help with from the list above
+                    </p>
+                </div>
+                <div class="text-center">
+                    <div class="bg-white/20 backdrop-blur-lg w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <span class="text-4xl font-black">2</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-2">Choose AI Feature</h3>
+                    <p class="text-purple-100">
+                        Pick what kind of help you need: hints, error explanation, or code review
+                    </p>
+                </div>
+                <div class="text-center">
+                    <div class="bg-white/20 backdrop-blur-lg w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <span class="text-4xl font-black">3</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-2">Learn & Improve</h3>
+                    <p class="text-purple-100">
+                        Apply the AI's suggestions and level up your coding skills!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.custom-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+.custom-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+.dark .custom-scroll::-webkit-scrollbar-track {
+    background: #1f2937;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+</style>
+
+<script>
+let selectedProblemId = null;
+let allProblems = [];
+
+// Load problems on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadProblems();
+});
+
+function loadProblems() {
+    fetch('/problems/api/list/')
+        .then(response => response.json())
+        .then(data => {
+            allProblems = data.problems || [];
+            displayProblems(allProblems);
+        })
+        .catch(error => {
+            console.error('Error loading problems:', error);
+            document.getElementById('problem-list').innerHTML = `
+                <div class="text-center py-12 col-span-full">
+                    <div class="text-5xl mb-4">❌</div>
+                    <p class="text-gray-600 dark:text-gray-400">Failed to load problems. Please refresh the page.</p>
+                </div>
+            `;
+        });
+}
+
+function displayProblems(problems) {
+    const problemList = document.getElementById('problem-list');
+    
+    if (problems.length === 0) {
+        problemList.innerHTML = `
+            <div class="text-center py-12 col-span-full">
+                <div class="text-5xl mb-4">📭</div>
+                <p class="text-gray-600 dark:text-gray-400">No problems found</p>
+            </div>
+        `;
+        return;
+    }
+    
+    problemList.innerHTML = problems.map(problem => `
+        <button onclick="selectProblem(${problem.id})" class="text-left p-5 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl shadow-md hover:shadow-xl transition-all duration-200 group">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="font-bold text-lg text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">${problem.title}</h3>
+                <span class="px-3 py-1 text-xs font-bold rounded-lg ${getDifficultyClass(problem.difficulty)}">${getDifficultyEmoji(problem.difficulty)} ${problem.difficulty}</span>
+            </div>
+            <div class="text-sm text-gray-600 dark:text-gray-400">
+                ${problem.total_submissions || 0} submissions
+            </div>
+        </button>
+    `).join('');
+}
+
+function getDifficultyClass(difficulty) {
+    const classes = {
+        'easy': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+        'medium': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+        'hard': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+    };
+    return classes[difficulty] || classes['medium'];
+}
+
+function getDifficultyEmoji(difficulty) {
+    const emojis = {
+        'easy': '🟢',
+        'medium': '🟡',
+        'hard': '🔴'
+    };
+    return emojis[difficulty] || '🟡';
+}
+
+// Search functionality
+document.getElementById('problem-search').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const filteredProblems = allProblems.filter(problem => 
+        problem.title.toLowerCase().includes(searchTerm)
+    );
+    displayProblems(filteredProblems);
+});
+
+function selectProblem(problemId) {
+    const problem = allProblems.find(p => p.id === problemId);
+    if (!problem) return;
+    
+    selectedProblemId = problemId;
+    
+    // Update selected problem display
+    document.getElementById('selected-problem-title').textContent = problem.title;
+    document.getElementById('selected-problem-difficulty').textContent = `${getDifficultyEmoji(problem.difficulty)} ${problem.difficulty}`;
+    document.getElementById('selected-problem-difficulty').className = `px-4 py-2 rounded-xl text-sm font-bold ${getDifficultyClass(problem.difficulty)}`;
+    document.getElementById('selected-problem-link').href = `/problems/${problemId}/solve/`;
+    
+    // Show AI tools section
+    document.getElementById('ai-tools-section').classList.remove('hidden');
+    
+    // Scroll to AI tools
+    document.getElementById('ai-tools-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function clearSelection() {
+    selectedProblemId = null;
+    document.getElementById('ai-tools-section').classList.add('hidden');
+    closeAIResponse();
+}
+
+function getHint() {
+    if (!selectedProblemId) {
+        showToast('Please select a problem first', 'error');
+        return;
+    }
+    
+    const code = document.getElementById('hint-code').value;
+    const hintLevel = document.getElementById('hint-level').value;
+    
+    showLoading('Getting hint...');
+    
+    fetch('{% url "core:ai_get_hint" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            problem_id: selectedProblemId,
+            code: code,
+            hint_level: parseInt(hintLevel)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAIResponse('💡 AI Hint (Level ' + hintLevel + ')', data.hint);
+            if (data.remaining_coins !== undefined) {
+                document.getElementById('user-coins').textContent = data.remaining_coins;
+            }
+        } else {
+            showToast(data.error || 'Failed to get hint', 'error');
+        }
+    })
+    .catch(error => {
+        showToast('An error occurred', 'error');
+    });
+}
+
+function explainError() {
+    if (!selectedProblemId) {
+        showToast('Please select a problem first', 'error');
+        return;
+    }
+    
+    const code = document.getElementById('error-code').value.trim();
+    const errorMessage = document.getElementById('error-message').value.trim();
+    const language = document.getElementById('error-language').value;
+    
+    if (!code || !errorMessage) {
+        showToast('Please provide both code and error message', 'error');
+        return;
+    }
+    
+    showLoading('Analyzing error...');
+    
+    fetch('{% url "core:ai_explain_error" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            problem_id: selectedProblemId,
+            code: code,
+            error_message: errorMessage,
+            language: language
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAIResponse('🔍 Error Explanation', data.explanation);
+        } else {
+            showToast(data.error || 'Failed to explain error', 'error');
+        }
+    })
+    .catch(error => {
+        showToast('An error occurred', 'error');
+    });
+}
+
+function reviewCode() {
+    if (!selectedProblemId) {
+        showToast('Please select a problem first', 'error');
+        return;
+    }
+    
+    const code = document.getElementById('review-code').value.trim();
+    const language = document.getElementById('review-language').value;
+    
+    if (!code) {
+        showToast('Please provide your code', 'error');
+        return;
+    }
+    
+    showLoading('Reviewing code...');
+    
+    fetch('{% url "core:ai_review_code" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            problem_id: selectedProblemId,
+            code: code,
+            language: language
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAIResponse('⭐ Code Review', data.review);
+            if (data.remaining_coins !== undefined) {
+                document.getElementById('user-coins').textContent = data.remaining_coins;
+            }
+        } else {
+            showToast(data.error || 'Failed to review code', 'error');
+        }
+    })
+    .catch(error => {
+        showToast('An error occurred', 'error');
+    });
+}
+
+function showAIResponse(title, content) {
+    document.getElementById('ai-response-title').textContent = title;
+    document.getElementById('ai-response-content').innerHTML = '<div class="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">' + content + '</div>';
+    document.getElementById('ai-response').classList.remove('hidden');
+    document.getElementById('ai-response').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeAIResponse() {
+    document.getElementById('ai-response').classList.add('hidden');
+}
+
+function showLoading(message) {
+    showAIResponse('⏳ Processing...', message);
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `fixed top-4 right-4 p-4 rounded-xl text-white font-bold z-50 shadow-2xl transform translate-x-0 transition-all ${type === 'error' ? 'bg-gradient-to-r from-red-500 to-pink-600' : 'bg-gradient-to-r from-blue-500 to-indigo-600'}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => { 
+        toast.classList.add('translate-x-full'); 
+        setTimeout(() => document.body.removeChild(toast), 300); 
+    }, 3000);
+}
+</script>
+{% endblock %}

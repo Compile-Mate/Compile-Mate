@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ company.name }} - CompileMate{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Back Button -->
+        <a href="{% url 'jobs:companies_list' %}" 
+           class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline mb-6">
+            ← Back to Companies
+        </a>
+
+        <!-- Company Header -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
+            <div class="flex items-start space-x-6">
+                <!-- Logo -->
+                <div>
+                    {% if company.logo_url %}
+                    <img src="{{ company.logo_url }}" 
+                         alt="{{ company.name }}" 
+                         class="w-32 h-32 rounded-2xl object-cover">
+                    {% else %}
+                    <div class="w-32 h-32 rounded-2xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white text-5xl font-bold">
+                        {{ company.name|first }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Company Info -->
+                <div class="flex-1">
+                    <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-2">
+                        {{ company.name }}
+                        {% if company.is_verified %}
+                        <span class="text-green-500 text-3xl">✓</span>
+                        {% endif %}
+                    </h1>
+                    
+                    <p class="text-gray-600 dark:text-gray-400 mb-4 text-lg">
+                        {{ company.description }}
+                    </p>
+
+                    <!-- Company Links -->
+                    <div class="flex items-center space-x-4">
+                        {% if company.website %}
+                        <a href="{{ company.website }}" 
+                           target="_blank"
+                           class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">
+                            🌐 Website
+                        </a>
+                        {% endif %}
+                        {% if company.linkedin_url %}
+                        <a href="{{ company.linkedin_url }}" 
+                           target="_blank"
+                           class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">
+                            💼 LinkedIn
+                        </a>
+                        {% endif %}
+                        {% if company.twitter_handle %}
+                        <a href="https://twitter.com/{{ company.twitter_handle }}" 
+                           target="_blank"
+                           class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">
+                            🐦 Twitter
+                        </a>
+                        {% endif %}
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="flex items-center space-x-6 mt-4">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-2xl">💼</span>
+                            <span class="text-gray-700 dark:text-gray-300 font-semibold">
+                                {{ jobs.count }} Open Positions
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Open Positions -->
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+                🎯 Open Positions at {{ company.name }}
+            </h2>
+
+            <div class="space-y-6">
+                {% for job in jobs %}
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <div class="p-6">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                                    {{ job.title }}
+                                </h3>
+
+                                <!-- Job Details -->
+                                <div class="flex flex-wrap gap-2 mb-4">
+                                    <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-sm font-semibold">
+                                        📍 {{ job.location }}
+                                    </span>
+                                    {% if job.remote_ok %}
+                                    <span class="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-full text-sm font-semibold">
+                                        🌍 Remote OK
+                                    </span>
+                                    {% endif %}
+                                    <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-full text-sm font-semibold">
+                                        {{ job.get_job_type_display }}
+                                    </span>
+                                    <span class="px-3 py-1 bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 rounded-full text-sm font-semibold">
+                                        {{ job.get_experience_level_display }}
+                                    </span>
+                                </div>
+
+                                <!-- Description Preview -->
+                                <p class="text-gray-600 dark:text-gray-400 mb-4">
+                                    {{ job.description|truncatewords:25 }}
+                                </p>
+
+                                <!-- Salary -->
+                                {% if job.salary_min and job.salary_max %}
+                                <div class="text-lg font-bold text-green-600 dark:text-green-400">
+                                    💰 {{ job.currency }} {{ job.salary_min|floatformat:0 }} - {{ job.salary_max|floatformat:0 }} / year
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Action Button -->
+                            <a href="{% url 'jobs:job_detail' job.slug %}" 
+                               class="ml-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg whitespace-nowrap">
+                                View Details →
+                            </a>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <span class="text-sm text-gray-500 dark:text-gray-400">
+                                📅 Posted {{ job.posted_at|timesince }} ago
+                            </span>
+                            <span class="text-sm text-gray-500 dark:text-gray-400">
+                                👥 {{ job.applications_count }} applicants
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
+                    <div class="text-6xl mb-4">📭</div>
+                    <h3 class="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-2">
+                        No Open Positions
+                    </h3>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        {{ company.name }} is not currently hiring.
+                    </p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Contact Info -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl shadow-lg p-8 border-2 border-blue-200 dark:border-blue-800">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                📧 Contact {{ company.name }}
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <span class="text-gray-600 dark:text-gray-400 font-semibold">Recruiter:</span>
+                    <span class="ml-2 text-gray-900 dark:text-white">{{ company.recruiter_name }}</span>
+                </div>
+                <div>
+                    <span class="text-gray-600 dark:text-gray-400 font-semibold">Email:</span>
+                    <a href="mailto:{{ company.recruiter_email }}" 
+                       class="ml-2 text-blue-600 dark:text-blue-400 hover:underline">
+                        {{ company.recruiter_email }}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+

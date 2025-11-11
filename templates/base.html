@@ -1,0 +1,757 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full" x-data="{darkMode: (localStorage.getItem('darkMode') === 'true') }" x-init="if(darkMode){document.documentElement.classList.add('dark');} else {document.documentElement.classList.remove('dark');}" x-effect="darkMode ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark'); localStorage.setItem('darkMode', darkMode)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CompileMate{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        success: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- LottieFiles Player -->
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    
+    <!-- particles.js -->
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <style>
+        [x-cloak] { display: none !important; }
+        
+        .animate-coin {
+            animation: coinPop 0.6s ease-out;
+        }
+        
+        @keyframes coinPop {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+            100% { transform: scale(1) rotate(360deg); opacity: 1; }
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Form field styling */
+        input[type="text"], input[type="email"], input[type="password"], input[type="number"], 
+        input[type="url"], input[type="tel"], textarea, select {
+            @apply w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors;
+        }
+        
+        input[type="checkbox"] {
+            @apply h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded;
+        }
+        
+        input[type="radio"] {
+            @apply h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300;
+        }
+        
+        /* Django form field styling */
+        .form-control {
+            @apply w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors;
+        }
+        
+        .form-control:focus {
+            @apply ring-2 ring-blue-500 border-blue-500;
+        }
+        
+        /* Error styling */
+        .errorlist {
+            @apply text-red-600 text-sm mt-1;
+        }
+        
+        .field-error {
+            @apply border-red-300 focus:ring-red-500 focus:border-red-500;
+        }
+    </style>
+    
+    <link rel="icon" type="image/png" href="{% static 'logo.png' %}">
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="h-full bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+    <!-- Particle Background (optional, can be overridden per page) -->
+    <div id="particles-js" class="fixed inset-0 z-0 pointer-events-none"></div>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        if (document.getElementById('particles-js')) {
+          particlesJS('particles-js', {
+            particles: {
+              number: { value: 60, density: { enable: true, value_area: 800 } },
+              color: { value: '#60a5fa' },
+              shape: { type: 'circle' },
+              opacity: { value: 0.2, random: true },
+              size: { value: 4, random: true },
+              line_linked: { enable: true, distance: 150, color: '#60a5fa', opacity: 0.1, width: 1 },
+              move: { enable: true, speed: 2, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false }
+            },
+            interactivity: {
+              detect_on: 'canvas',
+              events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' }, resize: true },
+              modes: { repulse: { distance: 100, duration: 0.4 }, push: { particles_nb: 4 } }
+            },
+            retina_detect: true
+          });
+        }
+      });
+    </script>
+    
+    <!-- Support Chat Widget -->
+    {% if user.is_authenticated %}
+    <div id="chat-widget" class="fixed bottom-4 right-4 z-50">
+        <!-- Chat Toggle Button -->
+        <button id="chat-toggle" 
+                class="bg-primary-600 hover:bg-primary-700 text-white rounded-full p-4 shadow-lg hover:scale-110 transition-all duration-200"
+                onclick="toggleChatWidget()"
+                title="Get Support">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+            </svg>
+        </button>
+        
+        <!-- Chat Window -->
+        <div id="chat-window" class="hidden absolute bottom-16 right-0 w-80 h-96 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
+            <!-- Chat Header -->
+            <div class="bg-primary-600 text-white p-4 rounded-t-lg">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-semibold">Support Chat</h3>
+                    <button onclick="toggleChatWidget()" class="text-white hover:text-gray-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Chat Content -->
+            <div class="flex flex-col h-80">
+                <!-- Welcome Message -->
+                <div class="flex-1 p-4 overflow-y-auto">
+                    <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 mb-4">
+                        <p class="text-sm text-gray-700 dark:text-gray-300">
+                            👋 Hi {{ user.username }}! Need help? Our support team is here to assist you.
+                        </p>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="space-y-2">
+                        <button onclick="startNewChat('general')" 
+                                class="w-full text-left p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                            <div class="font-medium text-gray-900 dark:text-white">General Question</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Ask about the platform</div>
+                        </button>
+                        
+                        <button onclick="startNewChat('technical')" 
+                                class="w-full text-left p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                            <div class="font-medium text-gray-900 dark:text-white">Technical Issue</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Report bugs or problems</div>
+                        </button>
+                        
+                        <button onclick="startNewChat('billing')" 
+                                class="w-full text-left p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                            <div class="font-medium text-gray-900 dark:text-white">Billing & Payments</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Questions about MateCoins</div>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Chat Actions -->
+                <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+                    <a href="{% url 'core:support_chat_list' %}" 
+                       class="block w-full text-center bg-primary-600 hover:bg-primary-700 text-white py-2 px-4 rounded-lg font-medium transition-colors">
+                        View All Chats
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <script>
+      // Chat widget functionality
+      function toggleChatWidget() {
+        const chatWindow = document.getElementById('chat-window');
+        const chatToggle = document.getElementById('chat-toggle');
+        
+        if (chatWindow.classList.contains('hidden')) {
+          chatWindow.classList.remove('hidden');
+          chatToggle.classList.add('bg-gray-600');
+          chatToggle.classList.remove('bg-primary-600');
+        } else {
+          chatWindow.classList.add('hidden');
+          chatToggle.classList.remove('bg-gray-600');
+          chatToggle.classList.add('bg-primary-600');
+        }
+      }
+      
+      function startNewChat(category) {
+        // Redirect to create chat page with pre-filled category
+        window.location.href = `{% url 'core:create_support_chat' %}?category=${category}`;
+      }
+      
+      // Close chat widget when clicking outside
+      document.addEventListener('click', function(event) {
+        const chatWidget = document.getElementById('chat-widget');
+        const chatWindow = document.getElementById('chat-window');
+        
+        if (chatWidget && !chatWidget.contains(event.target) && !chatWindow.classList.contains('hidden')) {
+          chatWindow.classList.add('hidden');
+          document.getElementById('chat-toggle').classList.remove('bg-gray-600');
+          document.getElementById('chat-toggle').classList.add('bg-primary-600');
+        }
+      });
+    </script>
+
+    <!-- Navigation -->
+    <nav class="bg-white/95 dark:bg-gray-900/95 shadow-lg sticky top-0 z-50 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800">
+        <div class="max-w-full px-6">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo - Extreme Left -->
+                <div class="flex-shrink-0">
+                    <a href="{% url 'core:home' %}" class="flex items-center space-x-3 group">
+                        <div class="relative">
+                            <img src="{% static 'logo.png' %}" alt="CompileMate Logo" class="w-10 h-10 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300" />
+                            <div class="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl blur opacity-0 group-hover:opacity-50 transition-opacity"></div>
+                        </div>
+                        <span class="text-2xl font-black bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 bg-clip-text text-transparent hidden sm:block">CompileMate</span>
+                    </a>
+                </div>
+                
+                <!-- Center Navigation with Dropdowns -->
+                <div class="hidden lg:flex items-center space-x-1 flex-1 justify-center max-w-5xl mx-auto">
+                    <a href="{% url 'problems:problem_list' %}" class="text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-600 px-3 py-2 rounded-lg text-sm font-semibold transition-all">Problems</a>
+                    <a href="{% url 'contests:contest_list' %}" class="text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 px-3 py-2 rounded-lg text-sm font-semibold transition-all">Contests</a>
+                    
+                    <!-- Compete Dropdown -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 px-3 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-1">
+                            Compete <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div x-show="open" @click.away="open = false" x-transition class="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl py-2 z-50 border border-gray-200 dark:border-gray-700">
+                            <a href="{% url 'battles:battle_list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20">⚔️ Battles</a>
+                            <a href="{% url 'daily_challenges:daily_challenge' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-orange-900/20">🎯 Daily Challenge</a>
+                            <a href="{% url 'achievements:list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20">🏆 Achievements</a>
+                            <a href="{% url 'teams:list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20">👥 Teams</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Learn Dropdown -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600 px-3 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-1">
+                            Learn <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div x-show="open" @click.away="open = false" x-transition class="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl py-2 z-50 border border-gray-200 dark:border-gray-700">
+                            <a href="{% url 'learning_paths:list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20">📚 Learning Paths</a>
+                            <a href="{% url 'certifications:list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20">🏆 Certifications</a>
+                            <a href="{% url 'core:ai_tutor_dashboard' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20">🤖 AI Tutor</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Community Dropdown -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="text-gray-700 dark:text-gray-300 hover:bg-pink-50 dark:hover:bg-pink-900/20 hover:text-pink-600 px-3 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-1">
+                            Community <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div x-show="open" @click.away="open = false" x-transition class="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl py-2 z-50 border border-gray-200 dark:border-gray-700">
+                            <a href="{% url 'social_feed:feed' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-pink-50 dark:hover:bg-pink-900/20">🌐 Social Feed</a>
+                            <a href="{% url 'code_reviews:list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20">👨‍💻 Code Reviews</a>
+                            <a href="{% url 'snippets:list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20">💾 Snippets</a>
+                            <a href="{% url 'core:leaderboard' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20">🏅 Leaderboard</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Career Dropdown -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 px-3 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-1">
+                            Career <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div x-show="open" @click.away="open = false" x-transition class="absolute left-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl py-2 z-50 border border-gray-200 dark:border-gray-700">
+                            <a href="{% url 'jobs:list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20">💼 Job Board</a>
+                            <a href="{% url 'resume_scanner:upload_resume' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20">📄 Resume Scanner</a>
+                        </div>
+                    </div>
+                    
+                    <a href="{% url 'rewards:marketplace' %}" class="text-gray-700 dark:text-gray-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 hover:text-yellow-600 px-3 py-2 rounded-lg text-sm font-semibold transition-all">🛒 Shop</a>
+                </div>
+                
+                <!-- Right Side - User Actions -->
+                <div class="hidden lg:flex items-center space-x-3 flex-shrink-0">
+                    <!-- Dark mode toggle -->
+                    <button @click="darkMode = !darkMode" class="p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200 group">
+                        <svg x-show="!darkMode" class="w-5 h-5 text-gray-700 dark:text-gray-300 group-hover:rotate-12 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                        </svg>
+                        <svg x-show="darkMode" class="w-5 h-5 text-yellow-400 group-hover:rotate-180 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                    
+                    {% if user.is_authenticated %}
+                        <!-- User coins -->
+                        <div class="hidden sm:flex items-center space-x-2 bg-yellow-100 dark:bg-yellow-900 px-3 py-1 rounded-full">
+                            <span class="text-yellow-600 dark:text-yellow-400 font-medium">{{ user.coins }}</span>
+                            <span class="text-yellow-600 dark:text-yellow-400">🪙</span>
+                        </div>
+                        
+                        <!-- User menu -->
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open" class="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                                {% if user.avatar %}
+                                    <img class="w-8 h-8 rounded-full" src="{{ user.avatar.url }}" alt="{{ user.username }}">
+                                {% else %}
+                                    <div class="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
+                                        <span class="text-white font-medium text-sm">{{ user.username|first|upper }}</span>
+                                    </div>
+                                {% endif %}
+                                <span class="hidden sm:block text-sm font-medium">{{ user.username }}</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            
+                            <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50">
+                                <a href="{% url 'core:dashboard' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    Dashboard
+                                </a>
+                                <a href="{% url 'core:profile' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    Profile
+                                </a>
+                                <a href="{% url 'rewards:user_rewards' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    My Rewards
+                                </a>
+                                <a href="{% url 'problems:submission_list' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    Submissions
+                                </a>
+                                <a href="{% url 'resume_scanner:upload_resume' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    Resume Scanner
+                                </a>
+                                <hr class="my-1 border-gray-200 dark:border-gray-600">
+                                <a href="{% url 'account_logout' %}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                    Sign Out
+                                </a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- Auth buttons -->
+                        <div class="flex items-center space-x-2">
+                            <a href="{% url 'account_login' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                                Sign In
+                            </a>
+                            <a href="{% url 'account_signup' %}" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                                Sign Up
+                            </a>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Mobile menu button -->
+                    <div class="md:hidden">
+                        <button @click="$dispatch('toggle-mobile-menu')" class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div x-data="{ open: false }" @toggle-mobile-menu.window="open = !open" x-show="open" x-transition class="md:hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                <a href="{% url 'problems:problem_list' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 block px-3 py-2 rounded-md text-base font-medium">
+                    Problems
+                </a>
+                <a href="{% url 'contests:contest_list' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 block px-3 py-2 rounded-md text-base font-medium">
+                    Contests
+                </a>
+                <a href="{% url 'battles:battle_list' %}" class="text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 block px-3 py-2 rounded-md text-base font-medium">
+                    ⚔️ Battles
+                </a>
+                <a href="{% url 'daily_challenges:daily_challenge' %}" class="text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400 block px-3 py-2 rounded-md text-base font-medium">
+                    🎯 Daily Challenge
+                </a>
+                <a href="{% url 'achievements:list' %}" class="text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 block px-3 py-2 rounded-md text-base font-medium">
+                    🏆 Achievements
+                </a>
+                <a href="{% url 'teams:list' %}" class="text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 block px-3 py-2 rounded-md text-base font-medium">
+                    👥 Teams
+                </a>
+                <a href="{% url 'rewards:marketplace' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 block px-3 py-2 rounded-md text-base font-medium">
+                    Marketplace
+                </a>
+                <a href="{% url 'core:leaderboard' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 block px-3 py-2 rounded-md text-base font-medium">
+                    Leaderboard
+                </a>
+                <a href="{% url 'resume_scanner:upload_resume' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 block px-3 py-2 rounded-md text-base font-medium">
+                    Resume Scanner
+                </a>
+                <a href="{% url 'core:ai_tutor_dashboard' %}" class="text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 block px-3 py-2 rounded-md text-base font-medium">
+                    🤖 AI Tutor
+                </a>
+                {% if user.is_authenticated %}
+                <hr class="border-gray-200 dark:border-gray-600">
+                <a href="{% url 'core:dashboard' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 block px-3 py-2 rounded-md text-base font-medium">
+                    Dashboard
+                </a>
+                <a href="{% url 'core:profile' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 block px-3 py-2 rounded-md text-base font-medium">
+                    Profile
+                </a>
+                <a href="{% url 'rewards:user_rewards' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 block px-3 py-2 rounded-md text-base font-medium">
+                    My Rewards
+                </a>
+                <a href="{% url 'account_logout' %}" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 block px-3 py-2 rounded-md text-base font-medium">
+                    Sign Out
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main content -->
+    <main class="relative z-10">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative mt-20 overflow-hidden">
+        <!-- Animated Background -->
+        <div class="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900"></div>
+        <div class="absolute inset-0 opacity-20">
+            <div class="absolute top-0 left-0 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
+            <div class="absolute top-0 right-0 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
+            <div class="absolute bottom-0 left-1/2 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
+        </div>
+
+        <div class="relative z-10">
+            <!-- Main Footer Content -->
+            <div class="max-w-7xl mx-auto px-4 py-16">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                    <!-- Brand Section -->
+                    <div class="lg:col-span-1">
+                        <div class="flex items-center mb-6">
+                            <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg">
+                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                                </svg>
+                            </div>
+                            <span class="ml-3 text-2xl font-extrabold text-white">CompileMate</span>
+                        </div>
+                        <p class="text-indigo-200 mb-6 leading-relaxed">
+                            Master competitive programming with gamified challenges, earn MateCoins, and unlock real rewards.
+                        </p>
+                        
+                        <!-- Newsletter -->
+                        <form class="space-y-3" onsubmit="event.preventDefault(); showToast('Thank you for subscribing! 🎉', 'success');">
+                            <input type="email" placeholder="Enter your email" 
+                                   class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-indigo-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent backdrop-blur-sm" required>
+                            <button class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] shadow-lg">
+                                Subscribe to Newsletter
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Platform Links -->
+                    <div>
+                        <h4 class="text-white font-bold text-lg mb-6">Platform</h4>
+                        <ul class="space-y-3">
+                            <li>
+                                <a href="{% url 'problems:problem_list' %}" class="text-indigo-200 hover:text-white transition-colors duration-200 flex items-center gap-2 group">
+                                    <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full group-hover:w-3 transition-all"></span>
+                                    Problems
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'contests:contest_list' %}" class="text-indigo-200 hover:text-white transition-colors duration-200 flex items-center gap-2 group">
+                                    <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full group-hover:w-3 transition-all"></span>
+                                    Contests
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'battles:battle_list' %}" class="text-indigo-200 hover:text-white transition-colors duration-200 flex items-center gap-2 group">
+                                    <span class="w-1.5 h-1.5 bg-red-400 rounded-full group-hover:w-3 transition-all"></span>
+                                    ⚔️ Battles
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'daily_challenges:daily_challenge' %}" class="text-indigo-200 hover:text-white transition-colors duration-200 flex items-center gap-2 group">
+                                    <span class="w-1.5 h-1.5 bg-orange-400 rounded-full group-hover:w-3 transition-all"></span>
+                                    🎯 Daily Challenge
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'achievements:list' %}" class="text-indigo-200 hover:text-white transition-colors duration-200 flex items-center gap-2 group">
+                                    <span class="w-1.5 h-1.5 bg-purple-400 rounded-full group-hover:w-3 transition-all"></span>
+                                    🏆 Achievements
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'teams:list' %}" class="text-indigo-200 hover:text-white transition-colors duration-200 flex items-center gap-2 group">
+                                    <span class="w-1.5 h-1.5 bg-green-400 rounded-full group-hover:w-3 transition-all"></span>
+                                    👥 Teams
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'rewards:marketplace' %}" class="text-indigo-200 hover:text-white transition-colors duration-200 flex items-center gap-2 group">
+                                    <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full group-hover:w-3 transition-all"></span>
+                                    Marketplace
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'core:leaderboard' %}" class="text-indigo-200 hover:text-white transition-colors duration-200 flex items-center gap-2 group">
+                                    <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full group-hover:w-3 transition-all"></span>
+                                    Leaderboard
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'resume_scanner:upload_resume' %}" class="text-indigo-200 hover:text-white transition-colors duration-200 flex items-center gap-2 group">
+                                    <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full group-hover:w-3 transition-all"></span>
+                                    Resume Scanner
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Resources -->
+                    <div>
+                        <h4 class="text-white font-bold text-lg mb-6">Resources</h4>
+                        <ul class="space-y-3">
+                            <li>
+                                <a href="{% url 'core:about' %}" class="text-indigo-200 hover:text-white transition-colors duration-200 flex items-center gap-2 group">
+                                    <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full group-hover:w-3 transition-all"></span>
+                                    About Us
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'core:faq' %}" class="text-indigo-200 hover:text-white transition-colors duration-200 flex items-center gap-2 group">
+                                    <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full group-hover:w-3 transition-all"></span>
+                                    FAQ
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'core:contact' %}" class="text-indigo-200 hover:text-white transition-colors duration-200 flex items-center gap-2 group">
+                                    <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full group-hover:w-3 transition-all"></span>
+                                    Contact Us
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'core:privacy' %}" class="text-indigo-200 hover:text-white transition-colors duration-200 flex items-center gap-2 group">
+                                    <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full group-hover:w-3 transition-all"></span>
+                                    Privacy Policy
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'core:terms' %}" class="text-indigo-200 hover:text-white transition-colors duration-200 flex items-center gap-2 group">
+                                    <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full group-hover:w-3 transition-all"></span>
+                                    Terms of Service
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Connect -->
+                    <div>
+                        <h4 class="text-white font-bold text-lg mb-6">Connect</h4>
+                        
+                        <!-- Social Links -->
+                        <div class="flex gap-4 mb-6">
+                            <a href="https://www.linkedin.com/in/mamidipaka-harshavardhan/" target="_blank" 
+                               class="w-12 h-12 bg-white/10 hover:bg-blue-500 rounded-xl flex items-center justify-center backdrop-blur-sm transition-all duration-200 transform hover:scale-110 hover:rotate-6 group">
+                                <svg class="w-6 h-6 text-indigo-200 group-hover:text-white transition-colors" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M24 4.557a9.93 9.93 0 01-2.828.775 4.932 4.932 0 002.165-2.724c-.951.564-2.005.974-3.127 1.195A4.92 4.92 0 0016.616 3c-2.73 0-4.942 2.21-4.942 4.932 0 .386.045.762.127 1.124C7.728 8.807 4.1 6.884 1.671 3.965c-.423.722-.666 1.561-.666 2.475 0 1.708.87 3.216 2.188 4.099a4.904 4.904 0 01-2.237-.616c-.054 2.281 1.581 4.415 3.949 4.89a4.936 4.936 0 01-2.224.084c.627 1.956 2.444 3.377 4.6 3.417A9.867 9.867 0 010 21.543a13.94 13.94 0 007.548 2.209c9.057 0 14.009-7.496 14.009-13.986 0-.213-.005-.425-.014-.636A9.936 9.936 0 0024 4.557z"/>
+                                </svg>
+                            </a>
+                            <a href="https://www.linkedin.com/in/mamidipaka-harshavardhan/" target="_blank" 
+                               class="w-12 h-12 bg-white/10 hover:bg-blue-600 rounded-xl flex items-center justify-center backdrop-blur-sm transition-all duration-200 transform hover:scale-110 hover:rotate-6 group">
+                                <svg class="w-6 h-6 text-indigo-200 group-hover:text-white transition-colors" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                                </svg>
+                            </a>
+                            <a href="https://www.instagram.com/harshavardhan_2411/" target="_blank" 
+                               class="w-12 h-12 bg-white/10 hover:bg-pink-600 rounded-xl flex items-center justify-center backdrop-blur-sm transition-all duration-200 transform hover:scale-110 hover:rotate-6 group">
+                                <svg class="w-6 h-6 text-indigo-200 group-hover:text-white transition-colors" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                                </svg>
+                            </a>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="space-y-3">
+                            <a href="{% url 'core:create_support_chat' %}" 
+                               class="block w-full text-center bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 border border-white/20">
+                                💬 Contact Support
+                            </a>
+                            <button onclick="window.scrollTo({top:0,behavior:'smooth'})" 
+                                    class="block w-full text-center bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02]">
+                                ↑ Back to Top
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <div class="border-t border-white/10">
+                <div class="max-w-7xl mx-auto px-4 py-6">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div class="text-indigo-200 text-sm">
+                            &copy; 2024 CompileMate. All rights reserved. Made with 💙 for coders.
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="text-indigo-200 text-sm">Theme:</span>
+                            <button onclick="document.documentElement.classList.toggle('dark'); localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));" 
+                                    class="w-12 h-6 bg-white/10 rounded-full relative transition-all duration-200 hover:bg-white/20 border border-white/20">
+                                <span class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 dark:translate-x-6">🌓</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Animations -->
+        <style>
+            @keyframes blob {
+                0%, 100% { transform: translate(0, 0) scale(1); }
+                33% { transform: translate(30px, -50px) scale(1.1); }
+                66% { transform: translate(-20px, 20px) scale(0.9); }
+            }
+            .animate-blob {
+                animation: blob 7s infinite;
+            }
+            .animation-delay-2000 {
+                animation-delay: 2s;
+            }
+            .animation-delay-4000 {
+                animation-delay: 4s;
+            }
+        </style>
+    </footer>
+
+    <!-- Notification toast -->
+    <div id="toast" class="fixed top-4 right-4 z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 max-w-sm">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <svg id="toast-icon" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div class="ml-3 w-0 flex-1">
+                    <p id="toast-message" class="text-sm font-medium text-gray-900 dark:text-white"></p>
+                </div>
+                <div class="ml-4 flex-shrink-0 flex">
+                    <button onclick="hideToast()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toast notification functions
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const messageEl = document.getElementById('toast-message');
+            const icon = document.getElementById('toast-icon');
+            
+            messageEl.textContent = message;
+            
+            // Set icon based on type
+            if (type === 'success') {
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+                icon.className = 'h-6 w-6 text-green-400';
+            } else if (type === 'error') {
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+                icon.className = 'h-6 w-6 text-red-400';
+            } else if (type === 'warning') {
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>';
+                icon.className = 'h-6 w-6 text-yellow-400';
+            }
+            
+            toast.classList.remove('hidden');
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                hideToast();
+            }, 5000);
+        }
+        
+        function hideToast() {
+            document.getElementById('toast').classList.add('hidden');
+        }
+        
+        // Coin animation function
+        function animateCoin(x, y) {
+            const coin = document.createElement('div');
+            coin.className = 'fixed z-50 text-2xl animate-coin';
+            coin.textContent = '🪙';
+            coin.style.left = x + 'px';
+            coin.style.top = y + 'px';
+            
+            document.body.appendChild(coin);
+            
+            setTimeout(() => {
+                document.body.removeChild(coin);
+            }, 600);
+        }
+        
+        // Global error handler
+        window.addEventListener('error', function(e) {
+            console.error('Global error:', e.error);
+            showToast('An unexpected error occurred', 'error');
+        });
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html> 

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}{{ certification.name }} - CompileMate{% endblock %}
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8">
+    <div class="max-w-4xl mx-auto px-4">
+        <a href="{% url 'certifications:list' %}" class="text-blue-600 dark:text-blue-400 hover:underline mb-6 inline-block">← Back to Certifications</a>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
+            <div class="text-center mb-8">
+                <div class="text-8xl mb-4">{{ certification.badge_icon }}</div>
+                <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-2">{{ certification.name }}</h1>
+                <span class="px-4 py-2 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-full font-semibold">
+                    {{ certification.get_difficulty_level_display }}
+                </span>
+            </div>
+            
+            <div class="prose dark:prose-invert max-w-none mb-8">
+                {{ certification.description|linebreaks }}
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 text-center">
+                    <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ certification.required_problems_solved }}</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">Problems Required</div>
+                </div>
+                <div class="bg-green-50 dark:bg-green-900/20 rounded-xl p-4 text-center">
+                    <div class="text-3xl font-bold text-green-600 dark:text-green-400">{{ certification.required_contests_participated }}</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">Contests Required</div>
+                </div>
+                <div class="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 text-center">
+                    <div class="text-3xl font-bold text-purple-600 dark:text-purple-400">{{ progress|default:0 }}%</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">Your Progress</div>
+                </div>
+            </div>
+            
+            {% if user_certificate %}
+            <div class="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-xl p-6 border-2 border-green-200 dark:border-green-800">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold text-green-800 dark:text-green-300 mb-2">✓ Certificate Earned!</h3>
+                        <p class="text-gray-700 dark:text-gray-300">Congratulations! You earned this on {{ user_certificate.earned_at|date:"M d, Y" }}</p>
+                    </div>
+                    <a href="{% url 'certifications:download' user_certificate.id %}" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
+                        Download PDF
+                    </a>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center">
+                <p class="text-gray-600 dark:text-gray-400 mb-4">Complete the requirements to earn this certificate</p>
+                {% if certification.learning_path %}
+                <a href="{% url 'learning_paths:detail' certification.learning_path.slug %}" class="inline-block bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-indigo-700 transition">
+                    Start Learning Path →
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

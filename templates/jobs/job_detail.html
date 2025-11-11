@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ job.title }} at {{ job.company.name }} - CompileMate{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Back Button -->
+        <a href="{% url 'jobs:list' %}" 
+           class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline mb-6">
+            ← Back to Jobs
+        </a>
+
+        <!-- Job Header -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
+            <div class="flex items-start justify-between mb-6">
+                <div class="flex items-center space-x-4">
+                    {% if job.company.logo_url %}
+                    <img src="{{ job.company.logo_url }}" 
+                         alt="{{ job.company.name }}" 
+                         class="w-16 h-16 rounded-xl object-cover">
+                    {% else %}
+                    <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white text-2xl font-bold">
+                        {{ job.company.name|first }}
+                    </div>
+                    {% endif %}
+                    <div>
+                        <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-2">
+                            {{ job.title }}
+                        </h1>
+                        <a href="{% url 'jobs:company_detail' job.company.slug %}" 
+                           class="text-xl text-blue-600 dark:text-blue-400 hover:underline font-semibold">
+                            {{ job.company.name }}
+                            {% if job.company.is_verified %}
+                            <span class="text-green-500">✓</span>
+                            {% endif %}
+                        </a>
+                    </div>
+                </div>
+
+                {% if user.is_authenticated %}
+                    {% if has_applied %}
+                    <span class="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-6 py-3 rounded-xl font-semibold flex items-center">
+                        ✓ Applied
+                    </span>
+                    {% else %}
+                    <a href="{% url 'jobs:apply_job' job.slug %}" 
+                       class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg">
+                        Apply Now →
+                    </a>
+                    {% endif %}
+                {% else %}
+                <a href="{% url 'account_login' %}?next={{ request.path }}" 
+                   class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg">
+                    Login to Apply
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Job Meta -->
+            <div class="flex flex-wrap gap-3 mb-6">
+                <span class="px-4 py-2 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full font-semibold">
+                    📍 {{ job.location }}
+                </span>
+                {% if job.remote_ok %}
+                <span class="px-4 py-2 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-full font-semibold">
+                    🌍 Remote OK
+                </span>
+                {% endif %}
+                <span class="px-4 py-2 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-full font-semibold">
+                    {{ job.get_job_type_display }}
+                </span>
+                <span class="px-4 py-2 bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 rounded-full font-semibold">
+                    {{ job.get_experience_level_display }}
+                </span>
+                <span class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full font-semibold">
+                    💼 {{ job.min_experience_years }}+ years
+                </span>
+            </div>
+
+            <!-- Salary -->
+            {% if job.salary_min and job.salary_max %}
+            <div class="text-2xl font-bold text-green-600 dark:text-green-400 mb-4">
+                💰 {{ job.currency }} {{ job.salary_min|floatformat:0 }} - {{ job.salary_max|floatformat:0 }} / year
+            </div>
+            {% endif %}
+
+            <!-- Stats -->
+            <div class="flex items-center space-x-6 text-sm text-gray-600 dark:text-gray-400">
+                <span>📅 Posted {{ job.posted_at|timesince }} ago</span>
+                <span>👥 {{ job.applications_count }} applicants</span>
+                <span>⏰ Closes {{ job.expires_at|timeuntil }}</span>
+            </div>
+        </div>
+
+        <!-- Job Description -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                📝 Job Description
+            </h2>
+            <div class="prose dark:prose-invert max-w-none">
+                {{ job.description|linebreaks }}
+            </div>
+        </div>
+
+        <!-- Required Skills -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                🛠️ Required Skills
+            </h2>
+            <div class="flex flex-wrap gap-3">
+                {% for skill in job.required_skills %}
+                <span class="px-4 py-2 bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 text-blue-700 dark:text-blue-300 rounded-lg font-semibold">
+                    {{ skill }}
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Coding Challenge -->
+        {% if job.has_challenge %}
+        <div class="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-2xl shadow-xl p-8 mb-8 border-2 border-red-200 dark:border-red-800">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                💻 Coding Challenge Required
+            </h2>
+            <p class="text-gray-700 dark:text-gray-300 mb-4">
+                This position requires completing a coding challenge after applying. You'll have <strong>{{ job.challenge_duration }} minutes</strong> to solve {{ job.challenge_problems.count }} problem(s).
+            </p>
+            <div class="flex items-center space-x-2">
+                <span class="text-red-600 dark:text-red-400 font-semibold">⏱️ Duration: {{ job.challenge_duration }} minutes</span>
+                <span class="text-red-600 dark:text-red-400">•</span>
+                <span class="text-red-600 dark:text-red-400 font-semibold">📊 {{ job.challenge_problems.count }} Problems</span>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Company Info -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                🏢 About {{ job.company.name }}
+            </h2>
+            <p class="text-gray-700 dark:text-gray-300 mb-4">
+                {{ job.company.description }}
+            </p>
+            <div class="flex items-center space-x-4">
+                {% if job.company.website %}
+                <a href="{{ job.company.website }}" 
+                   target="_blank"
+                   class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">
+                    🌐 Website
+                </a>
+                {% endif %}
+                {% if job.company.linkedin_url %}
+                <a href="{{ job.company.linkedin_url }}" 
+                   target="_blank"
+                   class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">
+                    💼 LinkedIn
+                </a>
+                {% endif %}
+                <a href="{% url 'jobs:company_detail' job.company.slug %}" 
+                   class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">
+                    📋 View All Jobs
+                </a>
+            </div>
+        </div>
+
+        <!-- Application Status (if applied) -->
+        {% if user_application %}
+        <div class="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-2xl shadow-xl p-8 border-2 border-green-200 dark:border-green-800">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                📋 Your Application Status
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <span class="text-gray-600 dark:text-gray-400">Status:</span>
+                    <span class="ml-2 px-3 py-1 bg-{{ user_application.status }}-100 dark:bg-{{ user_application.status }}-900 text-{{ user_application.status }}-700 dark:text-{{ user_application.status }}-300 rounded-full text-sm font-semibold">
+                        {{ user_application.get_status_display }}
+                    </span>
+                </div>
+                <div>
+                    <span class="text-gray-600 dark:text-gray-400">Applied:</span>
+                    <span class="ml-2 font-semibold text-gray-900 dark:text-white">
+                        {{ user_application.applied_at|date:"M d, Y" }}
+                    </span>
+                </div>
+            </div>
+            {% if user_application.status in 'applied,under_review,challenge_sent' %}
+            <a href="{% url 'jobs:withdraw_application' user_application.id %}" 
+               class="inline-block bg-red-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-red-700 transition-all duration-300"
+               onclick="return confirm('Are you sure you want to withdraw your application?')">
+                Withdraw Application
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}
+

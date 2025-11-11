@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}{{ profile_user.username }} - CompileMate{% endblock %}
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-pink-50 to-rose-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8">
+    <div class="max-w-4xl mx-auto px-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-20 h-20 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full flex items-center justify-center text-white text-3xl font-bold mr-4">
+                        {{ profile_user.username|first|upper }}
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ profile_user.username }}</h1>
+                        <p class="text-gray-600 dark:text-gray-400">Member since {{ profile_user.date_joined|date:"M Y" }}</p>
+                    </div>
+                </div>
+                {% if user != profile_user %}
+                <a href="{% url 'social_feed:follow' profile_user.username %}" class="bg-gradient-to-r from-pink-600 to-rose-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-pink-700 hover:to-rose-700 transition">
+                    {% if is_following %}Unfollow{% else %}Follow{% endif %}
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Posts by {{ profile_user.username }}</h2>
+        <div class="space-y-6">
+            {% for post in posts %}
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                <p class="text-xs text-gray-500 mb-2">{{ post.created_at|timesince }} ago</p>
+                <p class="text-gray-700 dark:text-gray-300 mb-4">{{ post.content }}</p>
+                <div class="flex items-center gap-4">
+                    <span class="text-gray-600 dark:text-gray-400">❤️ {{ post.likes_count }}</span>
+                    <span class="text-gray-600 dark:text-gray-400">💬 {{ post.comments_count }}</span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-12">
+                <p class="text-gray-600 dark:text-gray-400">No posts yet</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}My Certificates - CompileMate{% endblock %}
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8">
+    <div class="max-w-7xl mx-auto px-4">
+        <h1 class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 mb-8 text-center">📜 My Certificates</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for cert in user_certificates %}
+            <div class="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-2xl p-6 border-2 border-yellow-200 dark:border-yellow-800 shadow-xl hover:shadow-2xl transition-all duration-300">
+                <div class="text-6xl mb-4 text-center">{{ cert.certification.badge_icon }}</div>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white text-center mb-2">{{ cert.certification.name }}</h3>
+                <p class="text-gray-600 dark:text-gray-400 text-center mb-4">{{ cert.certification.get_difficulty_level_display }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-500 text-center mb-4">Earned on {{ cert.earned_at|date:"M d, Y" }}</p>
+                <div class="flex gap-2">
+                    <a href="{% url 'certifications:download' cert.id %}" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-center font-semibold hover:bg-blue-700 transition">
+                        📥 Download
+                    </a>
+                    <a href="{% url 'certifications:verify' cert.certificate_id %}" class="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg text-center font-semibold hover:bg-green-700 transition">
+                        ✓ Verify
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-20">
+                <div class="text-8xl mb-6">📜</div>
+                <h3 class="text-3xl font-bold text-gray-700 dark:text-gray-300 mb-4">No Certificates Yet</h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-8">Start learning and complete paths to earn certificates!</p>
+                <a href="{% url 'certifications:list' %}" class="inline-block bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-indigo-700 transition">
+                    Browse Certifications →
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

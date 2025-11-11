@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Achievements - CompileMate{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-red-100 dark:from-gray-900 dark:via-purple-950 dark:to-pink-950">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 mb-4">
+                🏆 Achievements
+            </h1>
+            <p class="text-xl text-gray-600 dark:text-gray-300">
+                Unlock achievements and earn rewards!
+            </p>
+        </div>
+
+        <!-- Progress Overview -->
+        <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-2xl shadow-2xl p-8 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="text-center">
+                    <div class="text-5xl font-black text-purple-600 dark:text-purple-400">{{ unlocked_count }}</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 font-semibold mt-2">Unlocked</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-5xl font-black text-gray-400 dark:text-gray-500">{{ total_achievements }}</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 font-semibold mt-2">Total</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-5xl font-black text-green-600 dark:text-green-400">{{ completion_rate|floatformat:0 }}%</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 font-semibold mt-2">Completion</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-5xl font-black text-yellow-600 dark:text-yellow-400">{{ total_points }}</div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 font-semibold mt-2">Points</div>
+                </div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="mt-6">
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
+                    <div class="bg-gradient-to-r from-purple-600 to-pink-600 h-4 rounded-full transition-all duration-500" style="width: {{ completion_rate }}%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Navigation -->
+        <div class="flex gap-4 mb-8">
+            <a href="{% url 'achievements:badge_showcase' %}" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-4 rounded-xl font-bold text-center shadow-lg">
+                🎖️ Badge Showcase
+            </a>
+            <a href="{% url 'achievements:milestones' %}" class="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-4 rounded-xl font-bold text-center shadow-lg">
+                🎯 Milestones
+            </a>
+        </div>
+
+        <!-- Unlocked Achievements -->
+        {% if unlocked_achievements %}
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">✨ Unlocked Achievements</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for achievement in unlocked_achievements %}
+                <div class="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 backdrop-blur-xl rounded-2xl shadow-xl p-6 border-2 border-yellow-400 dark:border-yellow-600 transform hover:scale-105 transition-all">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">🏆</div>
+                        <h3 class="font-bold text-xl text-gray-900 dark:text-white mb-2">{{ achievement.name }}</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">{{ achievement.description }}</p>
+                        
+                        <div class="flex items-center justify-center gap-4 mb-4">
+                            <span class="px-3 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 rounded-full text-xs font-bold">
+                                +{{ achievement.points }} pts
+                            </span>
+                            <span class="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 rounded-full text-xs font-bold">
+                                +{{ achievement.reward_coins }} 💰
+                            </span>
+                        </div>
+                        
+                        {% if achievement.badge %}
+                        <div class="flex items-center justify-center gap-2 text-sm text-purple-600 dark:text-purple-400 font-semibold">
+                            <span>🎖️</span>
+                            <span>{{ achievement.badge.name }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Locked Achievements -->
+        {% if locked_achievements %}
+        <div>
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">🔒 Locked Achievements</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for achievement in locked_achievements %}
+                <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-2xl shadow-xl p-6 opacity-75 hover:opacity-100 transition-all">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4 grayscale">🏆</div>
+                        <h3 class="font-bold text-xl text-gray-700 dark:text-gray-300 mb-2">{{ achievement.name }}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ achievement.description }}</p>
+                        
+                        <div class="flex items-center justify-center gap-4 mb-4">
+                            <span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full text-xs font-bold">
+                                +{{ achievement.points }} pts
+                            </span>
+                            <span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full text-xs font-bold">
+                                +{{ achievement.reward_coins }} 💰
+                            </span>
+                        </div>
+                        
+                        <!-- Progress Hint -->
+                        {% if achievement.badge %}
+                        <div class="text-xs text-gray-500 dark:text-gray-400 italic">
+                            Unlocks: {{ achievement.badge.name }} badge
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

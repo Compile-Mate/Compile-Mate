@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Companies - CompileMate{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-4">
+                🏢 Top Companies Hiring
+            </h1>
+            <p class="text-xl text-gray-600 dark:text-gray-300">
+                Discover amazing companies on CompileMate
+            </p>
+        </div>
+
+        <!-- Search -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 mb-8">
+            <form method="GET" class="flex gap-4">
+                <input type="text" 
+                       name="search" 
+                       value="{{ request.GET.search }}"
+                       placeholder="Search companies..." 
+                       class="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
+                <button type="submit" 
+                        class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg">
+                    🔍 Search
+                </button>
+            </form>
+        </div>
+
+        <!-- Companies Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for company in companies %}
+            <a href="{% url 'jobs:company_detail' company.slug %}" 
+               class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700 group">
+                <div class="p-6">
+                    <!-- Company Logo -->
+                    <div class="flex items-center justify-center mb-4">
+                        {% if company.logo_url %}
+                        <img src="{{ company.logo_url }}" 
+                             alt="{{ company.name }}" 
+                             class="w-24 h-24 rounded-xl object-cover">
+                        {% else %}
+                        <div class="w-24 h-24 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white text-4xl font-bold">
+                            {{ company.name|first }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Company Name -->
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white text-center mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {{ company.name }}
+                        {% if company.is_verified %}
+                        <span class="text-green-500">✓</span>
+                        {% endif %}
+                    </h3>
+
+                    <!-- Company Description -->
+                    <p class="text-gray-600 dark:text-gray-400 text-center mb-4 line-clamp-3">
+                        {{ company.description|truncatewords:20 }}
+                    </p>
+
+                    <!-- Job Count -->
+                    <div class="text-center">
+                        <span class="px-4 py-2 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full font-semibold">
+                            {{ company.job_postings.count }} Open Positions
+                        </span>
+                    </div>
+                </div>
+            </a>
+            {% empty %}
+            <div class="col-span-full text-center py-20">
+                <div class="text-8xl mb-6">🔍</div>
+                <h3 class="text-3xl font-bold text-gray-700 dark:text-gray-300 mb-4">
+                    No Companies Found
+                </h3>
+                <p class="text-gray-600 dark:text-gray-400">
+                    Try adjusting your search!
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+

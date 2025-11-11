@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Job Board - CompileMate{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-4">
+                💼 Job Board
+            </h1>
+            <p class="text-xl text-gray-600 dark:text-gray-300">
+                Find your dream developer job. Apply with your CompileMate profile!
+            </p>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 mb-8">
+            <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Search -->
+                <div class="md:col-span-2">
+                    <input type="text" 
+                           name="search" 
+                           value="{{ request.GET.search }}"
+                           placeholder="Search jobs, companies..." 
+                           class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+
+                <!-- Job Type -->
+                <select name="job_type" 
+                        class="px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
+                    <option value="">All Job Types</option>
+                    {% for value, label in job_types %}
+                    <option value="{{ value }}" {% if request.GET.job_type == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <!-- Experience Level -->
+                <select name="experience" 
+                        class="px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
+                    <option value="">All Experience</option>
+                    {% for value, label in experience_levels %}
+                    <option value="{{ value }}" {% if request.GET.experience == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <!-- Remote Filter -->
+                <div class="flex items-center space-x-2">
+                    <input type="checkbox" 
+                           name="remote" 
+                           value="1" 
+                           {% if request.GET.remote %}checked{% endif %}
+                           id="remote"
+                           class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                    <label for="remote" class="text-gray-700 dark:text-gray-300 font-medium">
+                        Remote Only
+                    </label>
+                </div>
+
+                <!-- Filter Button -->
+                <button type="submit" 
+                        class="md:col-span-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg">
+                    🔍 Filter Jobs
+                </button>
+            </form>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+                <div class="text-4xl font-bold">{{ jobs.count }}</div>
+                <div class="text-blue-100">Active Jobs</div>
+            </div>
+            <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg">
+                <div class="text-4xl font-bold">{{ jobs|length }}</div>
+                <div class="text-green-100">Companies Hiring</div>
+            </div>
+            <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
+                <div class="text-4xl font-bold">100%</div>
+                <div class="text-purple-100">Remote Friendly</div>
+            </div>
+        </div>
+
+        <!-- Job Listings -->
+        <div class="space-y-6">
+            {% for job in jobs %}
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700">
+                <div class="p-6">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <!-- Company Info -->
+                            <div class="flex items-center space-x-4 mb-3">
+                                {% if job.company.logo_url %}
+                                <img src="{{ job.company.logo_url }}" 
+                                     alt="{{ job.company.name }}" 
+                                     class="w-12 h-12 rounded-lg object-cover">
+                                {% else %}
+                                <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white text-xl font-bold">
+                                    {{ job.company.name|first }}
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white">
+                                        {{ job.title }}
+                                    </h3>
+                                    <a href="{% url 'jobs:company_detail' job.company.slug %}" 
+                                       class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">
+                                        {{ job.company.name }}
+                                        {% if job.company.is_verified %}
+                                        <span class="text-green-500">✓</span>
+                                        {% endif %}
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Job Details -->
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-sm font-semibold">
+                                    📍 {{ job.location }}
+                                </span>
+                                {% if job.remote_ok %}
+                                <span class="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-full text-sm font-semibold">
+                                    🌍 Remote OK
+                                </span>
+                                {% endif %}
+                                <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-full text-sm font-semibold">
+                                    {{ job.get_job_type_display }}
+                                </span>
+                                <span class="px-3 py-1 bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 rounded-full text-sm font-semibold">
+                                    {{ job.get_experience_level_display }}
+                                </span>
+                                {% if job.has_challenge %}
+                                <span class="px-3 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded-full text-sm font-semibold">
+                                    💻 Coding Challenge
+                                </span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Description Preview -->
+                            <p class="text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                                {{ job.description|truncatewords:30 }}
+                            </p>
+
+                            <!-- Salary -->
+                            {% if job.salary_min and job.salary_max %}
+                            <div class="text-lg font-bold text-green-600 dark:text-green-400 mb-4">
+                                💰 {{ job.currency }} {{ job.salary_min|floatformat:0 }} - {{ job.salary_max|floatformat:0 }} / year
+                            </div>
+                            {% endif %}
+
+                            <!-- Skills -->
+                            <div class="flex flex-wrap gap-2">
+                                {% for skill in job.required_skills|slice:":5" %}
+                                <span class="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-sm">
+                                    {{ skill }}
+                                </span>
+                                {% endfor %}
+                                {% if job.required_skills|length > 5 %}
+                                <span class="px-2 py-1 text-gray-500 text-sm">
+                                    +{{ job.required_skills|length|add:"-5" }} more
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Action Button -->
+                        <a href="{% url 'jobs:job_detail' job.slug %}" 
+                           class="ml-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg whitespace-nowrap">
+                            View Details →
+                        </a>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <span class="text-sm text-gray-500 dark:text-gray-400">
+                            📅 Posted {{ job.posted_at|timesince }} ago
+                        </span>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">
+                            👥 {{ job.applications_count }} applicants
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-20">
+                <div class="text-8xl mb-6">🔍</div>
+                <h3 class="text-3xl font-bold text-gray-700 dark:text-gray-300 mb-4">
+                    No Jobs Found
+                </h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-8">
+                    Try adjusting your filters or check back later!
+                </p>
+                <a href="{% url 'jobs:list' %}" 
+                   class="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300">
+                    Clear Filters
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Browse Companies -->
+        <div class="mt-12 text-center">
+            <a href="{% url 'jobs:companies_list' %}" 
+               class="inline-block bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg">
+                🏢 Browse All Companies
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+

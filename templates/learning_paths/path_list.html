@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Learning Paths - CompileMate{% endblock %}
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8">
+    <div class="max-w-7xl mx-auto px-4">
+        <h1 class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-8 text-center">📚 Learning Paths</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for path in paths %}
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 {% if path.id in enrolled_paths %}border-green-500{% else %}border-gray-200 dark:border-gray-700{% endif %}">
+                <div class="p-6">
+                    <div class="text-5xl mb-4">{{ path.icon }}</div>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ path.title }}</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">{{ path.description|truncatewords:15 }}</p>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-full text-sm font-semibold">{{ path.get_difficulty_display }}</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">⏱️ {{ path.estimated_duration }}h</span>
+                    </div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 mb-4">👥 {{ path.enrolled_count }} enrolled</div>
+                    <a href="{% url 'learning_paths:detail' path.slug %}" class="block w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-3 rounded-xl font-semibold text-center hover:from-indigo-700 hover:to-purple-700 transition">
+                        {% if path.id in enrolled_paths %}Continue Learning{% else %}View Path{% endif %} →
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

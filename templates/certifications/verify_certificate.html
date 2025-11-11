@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Verify Certificate - CompileMate{% endblock %}
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-16">
+    <div class="max-w-3xl mx-auto px-4">
+        {% if verified %}
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-12 text-center">
+            <div class="text-8xl mb-6">✅</div>
+            <h1 class="text-4xl font-extrabold text-green-600 dark:text-green-400 mb-4">Certificate Verified!</h1>
+            <div class="bg-green-50 dark:bg-green-900/20 rounded-xl p-6 mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">{{ user_certificate.certification.name }}</h2>
+                <div class="grid grid-cols-2 gap-4 text-left">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Recipient:</p>
+                        <p class="font-semibold text-gray-900 dark:text-white">{{ user_certificate.user.username }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Issued:</p>
+                        <p class="font-semibold text-gray-900 dark:text-white">{{ user_certificate.earned_at|date:"M d, Y" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Certificate ID:</p>
+                        <p class="font-mono text-sm text-gray-900 dark:text-white">{{ user_certificate.certificate_id }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Status:</p>
+                        <p class="font-semibold text-green-600 dark:text-green-400">Valid ✓</p>
+                    </div>
+                </div>
+            </div>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">This certificate is authentic and issued by CompileMate</p>
+        </div>
+        {% else %}
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-12 text-center">
+            <div class="text-8xl mb-6">❌</div>
+            <h1 class="text-4xl font-extrabold text-red-600 dark:text-red-400 mb-4">Certificate Not Found</h1>
+            <p class="text-gray-600 dark:text-gray-400 mb-8">The certificate ID you provided is invalid or does not exist in our system.</p>
+            <a href="{% url 'certifications:list' %}" class="inline-block bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-blue-700 transition">
+                Browse Certifications
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

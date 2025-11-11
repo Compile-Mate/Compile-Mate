@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}{{ snippet.title }} - CompileMate{% endblock %}
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-teal-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8">
+    <div class="max-w-5xl mx-auto px-4">
+        <a href="{% url 'snippets:list' %}" class="text-blue-600 dark:text-blue-400 hover:underline mb-6 inline-block">← Back to Snippets</a>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ snippet.title }}</h1>
+                    <p class="text-gray-600 dark:text-gray-400">By: {{ snippet.author.username }} • {{ snippet.created_at|timesince }} ago</p>
+                </div>
+                <span class="px-4 py-2 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full font-semibold">{{ snippet.language }}</span>
+            </div>
+            
+            {% if snippet.description %}
+            <p class="text-gray-700 dark:text-gray-300 mb-6">{{ snippet.description }}</p>
+            {% endif %}
+            
+            <div class="bg-gray-900 rounded-xl p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-gray-400 text-sm">{{ snippet.language }}</span>
+                    <button onclick="navigator.clipboard.writeText(document.getElementById('snippet-code').innerText)" class="text-green-400 hover:text-green-300 text-sm">📋 Copy</button>
+                </div>
+                <pre class="text-gray-100 text-sm overflow-x-auto"><code id="snippet-code">{{ snippet.code }}</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}My Learning Paths - CompileMate{% endblock %}
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8">
+    <div class="max-w-7xl mx-auto px-4">
+        <h1 class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-8 text-center">📚 My Learning Paths</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for enrollment in enrollments %}
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                <div class="text-5xl mb-4">{{ enrollment.learning_path.icon }}</div>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ enrollment.learning_path.title }}</h3>
+                <div class="mb-4">
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-gray-600 dark:text-gray-400">Progress</span>
+                        <span class="font-bold text-indigo-600 dark:text-indigo-400">{{ enrollment.progress_percentage }}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 h-3 rounded-full" style="width: {{ enrollment.progress_percentage }}%"></div>
+                    </div>
+                </div>
+                <a href="{% url 'learning_paths:detail' enrollment.learning_path.slug %}" class="block w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-3 rounded-xl font-semibold text-center hover:from-indigo-700 hover:to-purple-700 transition">
+                    Continue Learning →
+                </a>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-20">
+                <div class="text-8xl mb-6">📚</div>
+                <h3 class="text-3xl font-bold text-gray-700 dark:text-gray-300 mb-4">No Enrolled Paths Yet</h3>
+                <a href="{% url 'learning_paths:list' %}" class="inline-block bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition">
+                    Browse Learning Paths →
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

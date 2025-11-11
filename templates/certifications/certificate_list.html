@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Certifications - CompileMate{% endblock %}
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8">
+    <div class="max-w-7xl mx-auto px-4">
+        <h1 class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 mb-4 text-center">🏆 Certifications</h1>
+        <p class="text-xl text-gray-600 dark:text-gray-300 text-center mb-8">Earn verified certificates by completing learning paths</p>
+        
+        {% if user_certificates %}
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">My Certificates ({{ user_certificates.count }})</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for cert in user_certificates %}
+                <div class="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-2xl p-6 border-2 border-yellow-200 dark:border-yellow-800 shadow-xl">
+                    <div class="text-5xl mb-4 text-center">{{ cert.certification.badge_icon }}</div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white text-center mb-2">{{ cert.certification.name }}</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 text-center mb-4">Earned {{ cert.earned_at|timesince }} ago</p>
+                    <div class="flex gap-2">
+                        <a href="{% url 'certifications:download' cert.id %}" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg text-center font-semibold hover:bg-blue-700 transition">📥 Download</a>
+                        <a href="{% url 'certifications:verify' cert.certificate_id %}" class="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg text-center font-semibold hover:bg-green-700 transition">✓ Verify</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Available Certifications</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for cert in certifications %}
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-200 dark:border-gray-700">
+                <div class="p-6">
+                    <div class="text-5xl mb-4 text-center">{{ cert.badge_icon }}</div>
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ cert.name }}</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">{{ cert.description|truncatewords:20 }}</p>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="px-3 py-1 bg-{{ cert.get_difficulty_level_display|lower }}-100 text-{{ cert.get_difficulty_level_display|lower }}-700 rounded-full text-sm font-semibold">
+                            {{ cert.get_difficulty_level_display }}
+                        </span>
+                    </div>
+                    <a href="{% url 'certifications:detail' cert.slug %}" class="block w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-3 rounded-xl font-semibold text-center hover:from-purple-700 hover:to-indigo-700 transition">
+                        View Details →
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-20">
+                <div class="text-8xl mb-4">🏆</div>
+                <h3 class="text-2xl font-bold text-gray-700 dark:text-gray-300">No certifications available yet</h3>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

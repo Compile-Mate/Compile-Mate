@@ -1,0 +1,639 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ problem.title }} - CompileMate{% endblock %}
+
+{% block extra_css %}
+<!-- Cache version: 2.0 - Updated constraints rendering -->
+<style>
+    /* Animations */
+    @keyframes blob {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(30px, -50px) scale(1.1); }
+        66% { transform: translate(-20px, 20px) scale(0.9); }
+    }
+    .animate-blob {
+        animation: blob 7s infinite;
+    }
+    .animation-delay-2000 {
+        animation-delay: 2s;
+    }
+    .animation-delay-4000 {
+        animation-delay: 4s;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes coinBounce {
+        0% { transform: scale(0.5); opacity: 0; }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    .coin-animation {
+        animation: coinBounce 0.6s ease-out;
+    }
+    
+    @keyframes pulse-glow {
+        0%, 100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.4); }
+        50% { box-shadow: 0 0 40px rgba(168, 85, 247, 0.8); }
+    }
+    .ai-button-glow {
+        animation: pulse-glow 2s infinite;
+    }
+    
+    /* Test Cases */
+    .test-case-passed {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        border-color: #10b981;
+    }
+    .test-case-failed {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        border-color: #ef4444;
+    }
+    .dark .test-case-passed {
+        background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+        border-color: #10b981;
+    }
+    .dark .test-case-failed {
+        background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+        border-color: #ef4444;
+    }
+    
+    /* Monaco Editor Styling */
+    #monaco-editor {
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Custom Scrollbar */
+    .custom-scroll::-webkit-scrollbar {
+        width: 8px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    .dark .custom-scroll::-webkit-scrollbar-track {
+        background: #1f2937;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950">
+    <!-- Animated Background -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-20 left-10 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+        <div class="absolute top-40 right-10 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div class="absolute bottom-20 left-1/2 w-96 h-96 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+    </div>
+
+    <!-- Header -->
+    <div class="relative z-10 bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 shadow-lg sticky top-0">
+        <div class="max-w-[1920px] mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <a href="{% url 'problems:problem_list' %}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        </svg>
+                        Back
+                    </a>
+                    <div>
+                        <h1 class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
+                            {{ problem.title }}
+                        </h1>
+                        <div class="flex items-center gap-3 mt-1">
+                            <span class="px-3 py-1 text-sm font-bold rounded-xl shadow-md
+                                {% if problem.difficulty == 'easy' %}bg-gradient-to-r from-green-400 to-emerald-500 text-white
+                                {% elif problem.difficulty == 'medium' %}bg-gradient-to-r from-yellow-400 to-orange-500 text-white
+                                {% else %}bg-gradient-to-r from-red-400 to-pink-500 text-white{% endif %}">
+                                {% if problem.difficulty == 'easy' %}🟢 Easy{% elif problem.difficulty == 'medium' %}🟡 Medium{% else %}🔴 Hard{% endif %}
+                            </span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">•</span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400 font-medium">{{ problem.total_submissions }} submissions</span>
+                            <span id="problem-timer" class="ml-4 text-sm font-mono bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-3 py-1.5 rounded-lg shadow-md flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span id="timer-display">00:00:00</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="text-right">
+                        <div class="text-sm text-gray-600 dark:text-gray-400 font-semibold">Reward</div>
+                        <div class="flex items-center gap-3 mt-1">
+                            <span class="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 rounded-xl text-sm font-bold shadow-sm">
+                                💰 {{ problem.coin_reward }}
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-xl text-sm font-bold shadow-sm">
+                                ⚡ {{ problem.xp_reward }} XP
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="relative z-10 max-w-[1920px] mx-auto px-6 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left: Problem Description -->
+            <div class="space-y-6 custom-scroll" style="max-height: calc(100vh - 200px); overflow-y: auto;">
+                <!-- Problem Description Card -->
+                <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl shadow-2xl border-2 border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+                    <!-- Header with Gradient -->
+                    <div class="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-6">
+                        <h2 class="text-2xl font-extrabold text-white flex items-center gap-3">
+                            <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
+                                📋
+                            </div>
+                            Problem Description
+                        </h2>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div class="p-8">
+                        <!-- Problem Statement -->
+                        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 border-2 border-blue-200 dark:border-blue-800 shadow-inner mb-6">
+                            <div class="prose prose-lg max-w-none">
+                                <div class="text-gray-800 dark:text-gray-100 leading-relaxed text-base whitespace-pre-wrap font-sans">{{ problem.description }}</div>
+                            </div>
+                        </div>
+                        
+                        
+                        <!-- Tags Section -->
+                        {% if problem.tags.all %}
+                        <div class="mt-8 pt-6 border-t-2 border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="text-2xl">🏷️</span>
+                                <h4 class="text-lg font-bold text-gray-900 dark:text-white">Topics</h4>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                {% for tag in problem.tags.all %}
+                                <span class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200">
+                                    {{ tag.name }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Expert Help Card -->
+                <div class="relative group">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-all duration-300"></div>
+                    <div class="relative bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-6 shadow-2xl">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <h3 class="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                    </svg>
+                                    Need Expert Help?
+                                </h3>
+                                <p class="text-white/90 text-sm mb-4">Connect with programming experts for real-time collaborative coding, video meetings, and whiteboard sessions.</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-lg text-white text-xs font-semibold">🎥 Video Call</span>
+                                    <span class="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-lg text-white text-xs font-semibold">📝 Whiteboard</span>
+                                    <span class="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-lg text-white text-xs font-semibold">💻 Live Coding</span>
+                                    <span class="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-lg text-white text-xs font-semibold">🖥️ Screen Share</span>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <a href="{% url 'collaboration:create' %}" class="inline-flex items-center gap-2 px-6 py-3 bg-white hover:bg-gray-50 text-purple-600 rounded-xl font-bold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-200">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                                    </svg>
+                                    Ask Expert
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Code Editor -->
+            <div class="space-y-6 custom-scroll" style="max-height: calc(100vh - 200px); overflow-y: auto;">
+                <!-- Code Editor Card -->
+                <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50">
+                    <div class="p-6">
+                        <!-- Editor Header -->
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                                    </svg>
+                                </div>
+                                Code Editor
+                            </h2>
+                            <div class="flex items-center gap-3">
+                                <select id="language-selector" class="px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-xl text-sm font-semibold bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-md hover:shadow-lg transition-all">
+                                    <option value="python">🐍 Python</option>
+                                    <option value="cpp">⚡ C++</option>
+                                    <option value="java">☕ Java</option>
+                                    <option value="javascript">🟨 JavaScript</option>
+                                </select>
+                                <button id="reset-btn" class="px-4 py-2.5 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all">
+                                    🔄 Reset
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Run & Submit Buttons (TOP PLACEMENT) -->
+                        <div class="flex gap-4 mb-6">
+                            <button id="run-btn" class="flex-1 inline-flex items-center justify-center gap-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-black py-4 px-6 rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-200 text-lg">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span>▶ RUN CODE</span>
+                            </button>
+                            <button id="submit-btn" class="flex-1 inline-flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black py-4 px-6 rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-200 text-lg">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span>✓ SUBMIT</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Monaco Editor -->
+                        <div class="mb-6">
+                            <div id="monaco-editor" style="height: 500px;"></div>
+                        </div>
+                        
+                        <input type="hidden" id="problem-id" value="{{ problem.id }}">
+                        
+                        <!-- Results Display -->
+                        <div id="submission-results" class="mt-6 hidden">
+                            <div class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-xl animate-fade-in">
+                                <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
+                                    <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                    </svg>
+                                    Test Results
+                                </h3>
+                                <div id="results-content"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div id="success-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div class="relative">
+        <div class="absolute -inset-4 bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 rounded-3xl blur-2xl opacity-75 animate-pulse"></div>
+        <div class="relative bg-white dark:bg-gray-800 rounded-3xl p-10 max-w-md w-full text-center shadow-2xl transform scale-100">
+            <div class="text-8xl mb-6 animate-bounce">🎉</div>
+            <h3 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600 mb-4">
+                Congratulations!
+            </h3>
+            <p class="text-gray-600 dark:text-gray-300 text-lg mb-6">Your solution has been accepted!</p>
+            <div class="flex items-center justify-center gap-6 mb-8">
+                <div class="text-center">
+                    <div class="text-5xl font-black text-yellow-500 coin-animation mb-2">+{{ problem.coin_reward }}</div>
+                    <div class="text-sm font-semibold text-gray-600 dark:text-gray-400">💰 MateCoins</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-5xl font-black text-green-500 coin-animation mb-2">+{{ problem.xp_reward }}</div>
+                    <div class="text-sm font-semibold text-gray-600 dark:text-gray-400">⚡ XP Points</div>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closeSuccessModal()" class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transform hover:scale-105 transition-all">
+                    Continue
+                </button>
+                <a href="{% url 'problems:problem_list' %}" class="flex-1 bg-gradient-to-r from-gray-500 to-slate-600 hover:from-gray-600 hover:to-slate-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transform hover:scale-105 transition-all">
+                    Next Problem
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div id="error-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div class="relative">
+        <div class="absolute -inset-4 bg-gradient-to-r from-red-400 via-pink-500 to-purple-500 rounded-3xl blur-2xl opacity-75 animate-pulse"></div>
+        <div class="relative bg-white dark:bg-gray-800 rounded-3xl p-10 max-w-md w-full text-center shadow-2xl">
+            <div class="text-8xl mb-6">😅</div>
+            <h3 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-pink-600 mb-4">
+                Keep Trying!
+            </h3>
+            <p class="text-gray-600 dark:text-gray-300 text-lg mb-6">Don't give up! Use AI Tutor or connect with expert programmers for personalized guidance.</p>
+            <div class="flex gap-3">
+                <button onclick="closeErrorModal()" class="flex-1 bg-gradient-to-r from-gray-500 to-slate-600 hover:from-gray-600 hover:to-slate-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transform hover:scale-105 transition-all">
+                    Try Again
+                </button>
+                <a href="https://codeconnect.vercel.app/" target="_blank" class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transform hover:scale-105 transition-all">
+                    💬 Ask Expert
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.js"></script>
+<script>
+    let editor;
+    let currentLanguage = 'python';
+    
+    // Problem Timer Implementation
+    let timerInterval;
+    let startTime;
+    let elapsedTime = 0;
+    let isPaused = false;
+    
+    function loadTimerState() {
+        const problemId = document.getElementById('problem-id').value;
+        const savedState = localStorage.getItem(`timer_${problemId}`);
+        if (savedState) {
+            const state = JSON.parse(savedState);
+            elapsedTime = state.elapsedTime || 0;
+            startTime = Date.now() - elapsedTime;
+        } else {
+            startTime = Date.now();
+        }
+    }
+    
+    function saveTimerState() {
+        const problemId = document.getElementById('problem-id').value;
+        localStorage.setItem(`timer_${problemId}`, JSON.stringify({
+            elapsedTime: elapsedTime,
+            lastUpdated: Date.now()
+        }));
+    }
+    
+    function formatTime(ms) {
+        const totalSeconds = Math.floor(ms / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+    
+    function updateTimer() {
+        if (!isPaused) {
+            elapsedTime = Date.now() - startTime;
+            document.getElementById('timer-display').textContent = formatTime(elapsedTime);
+            saveTimerState();
+        }
+    }
+    
+    function startTimer() {
+        loadTimerState();
+        timerInterval = setInterval(updateTimer, 1000);
+        updateTimer();
+    }
+    
+    window.addEventListener('blur', () => {
+        isPaused = true;
+        saveTimerState();
+    });
+    
+    window.addEventListener('focus', () => {
+        isPaused = false;
+        startTime = Date.now() - elapsedTime;
+    });
+    
+    function clearTimer() {
+        clearInterval(timerInterval);
+        const problemId = document.getElementById('problem-id').value;
+        localStorage.removeItem(`timer_${problemId}`);
+    }
+    
+    document.addEventListener('DOMContentLoaded', startTimer);
+    
+    // Monaco Editor setup
+    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
+    require(['vs/editor/editor.main'], function() {
+        const templates = {
+            python: `{{ problem.starter_code.python|default:"def solution():\n    # Your code here\n    pass" }}`,
+            cpp: `{{ problem.starter_code.cpp|default:"#include <iostream>\n#include <vector>\n#include <string>\n\nusing namespace std;\n\nclass Solution {\npublic:\n    // Your solution here\n};" }}`,
+            java: `{{ problem.starter_code.java|default:"public class Solution {\n    // Your solution here\n}" }}`,
+            javascript: `{{ problem.starter_code.javascript|default:"function solution() {\n    // Your code here\n}" }}`
+        };
+        
+        editor = monaco.editor.create(document.getElementById('monaco-editor'), {
+            value: templates[currentLanguage],
+            language: currentLanguage,
+            theme: 'vs-dark',
+            automaticLayout: true,
+            minimap: { enabled: true },
+            fontSize: 16,
+            fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
+            lineNumbers: 'on',
+            roundedSelection: true,
+            scrollBeyondLastLine: false,
+            cursorBlinking: 'smooth',
+            cursorSmoothCaretAnimation: true,
+            smoothScrolling: true,
+            padding: { top: 16, bottom: 16 },
+        });
+        
+        document.getElementById('language-selector').addEventListener('change', function(e) {
+            currentLanguage = e.target.value;
+            editor.setValue(templates[currentLanguage]);
+            monaco.editor.setModelLanguage(editor.getModel(), currentLanguage);
+        });
+        
+        document.getElementById('reset-btn').addEventListener('click', function() {
+            editor.setValue(templates[currentLanguage]);
+        });
+    });
+    
+    // Run code
+    document.getElementById('run-btn').addEventListener('click', function() {
+        const code = editor.getValue();
+        const language = currentLanguage;
+        const problemId = document.getElementById('problem-id').value;
+        this.disabled = true;
+        this.innerHTML = '<svg class="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> <span>Running...</span>';
+        
+        fetch('{% url "judge:submit_code" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: new URLSearchParams({
+                code: code,
+                language: language,
+                problem_id: problemId,
+                run_mode: 'run'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            this.disabled = false;
+            this.innerHTML = '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>▶ RUN CODE</span>';
+            showSubmissionResults(data);
+        })
+        .catch(error => {
+            this.disabled = false;
+            this.innerHTML = '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>▶ RUN CODE</span>';
+            showToast('An error occurred while running code', 'error');
+        });
+    });
+    
+    // Submit solution
+    document.getElementById('submit-btn').addEventListener('click', function() {
+        const code = editor.getValue();
+        const language = currentLanguage;
+        const problemId = document.getElementById('problem-id').value;
+        if (!code.trim()) {
+            showToast('Please write some code before submitting', 'error');
+            return;
+        }
+        this.disabled = true;
+        this.innerHTML = '<svg class="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> <span>Submitting...</span>';
+        
+        fetch('{% url "judge:submit_code" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: new URLSearchParams({
+                code: code,
+                language: language,
+                problem_id: problemId,
+                run_mode: 'submit'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            this.disabled = false;
+            this.innerHTML = '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>✓ SUBMIT</span>';
+            showSubmissionResults(data);
+            
+            if (data.status === 'Accepted') {
+                setTimeout(() => {
+                    showSuccessModal();
+                }, 1000);
+            } else {
+                setTimeout(() => {
+                    showErrorModal();
+                }, 1000);
+            }
+        })
+        .catch(error => {
+            this.disabled = false;
+            this.innerHTML = '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>✓ SUBMIT</span>';
+            showToast('An error occurred while submitting', 'error');
+        });
+    });
+    
+    function showSubmissionResults(data) {
+        const resultsDiv = document.getElementById('submission-results');
+        const contentDiv = document.getElementById('results-content');
+        let html = '';
+        
+        if (data.status) {
+            const isAccepted = data.status === 'Accepted';
+            html += `<div class="mb-6 p-6 rounded-xl ${isAccepted ? 'bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 border-2 border-green-500' : 'bg-gradient-to-r from-red-100 to-pink-100 dark:from-red-900/30 dark:to-pink-900/30 border-2 border-red-500'}">
+                <div class="flex items-center justify-between">
+                    <span class="text-2xl font-black ${isAccepted ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}">
+                        ${isAccepted ? '✅ Accepted' : '❌ ' + data.status}
+                    </span>
+                    <div class="flex items-center gap-4">`;
+            if (data.execution_time) html += `<span class="px-3 py-1 bg-white dark:bg-gray-800 rounded-lg text-sm font-bold text-gray-700 dark:text-gray-300">⏱️ ${data.execution_time}s</span>`;
+            if (data.memory_used) html += `<span class="px-3 py-1 bg-white dark:bg-gray-800 rounded-lg text-sm font-bold text-gray-700 dark:text-gray-300">💾 ${data.memory_used} KB</span>`;
+            html += `</div></div></div>`;
+        }
+        
+        if (data.test_cases && data.test_cases.length > 0) {
+            html += `<div class="space-y-4">`;
+            data.test_cases.forEach((testCase, index) => {
+                const isPassed = testCase.status === 'passed';
+                html += `<div class="p-5 rounded-xl border-2 shadow-lg ${isPassed ? 'test-case-passed' : 'test-case-failed'}">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="font-black text-lg ${isPassed ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}">Test Case ${index + 1}</span>
+                        <span class="px-4 py-1 rounded-lg font-bold ${isPassed ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}">
+                            ${isPassed ? '✓ Passed' : '✗ Failed'}
+                        </span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex gap-2"><span class="font-bold ${isPassed ? 'text-green-800 dark:text-green-200' : 'text-red-800 dark:text-red-200'}">Input:</span><code class="flex-1 bg-white dark:bg-gray-800 px-3 py-2 rounded-lg text-sm font-mono">${testCase.input}</code></div>
+                        <div class="flex gap-2"><span class="font-bold ${isPassed ? 'text-green-800 dark:text-green-200' : 'text-red-800 dark:text-red-200'}">Expected:</span><code class="flex-1 bg-white dark:bg-gray-800 px-3 py-2 rounded-lg text-sm font-mono">${testCase.expected}</code></div>
+                        <div class="flex gap-2"><span class="font-bold ${isPassed ? 'text-green-800 dark:text-green-200' : 'text-red-800 dark:text-red-200'}">Output:</span><code class="flex-1 bg-white dark:bg-gray-800 px-3 py-2 rounded-lg text-sm font-mono">${testCase.output}</code></div>
+                        ${testCase.error_message ? `<div class="flex gap-2"><span class="font-bold text-red-800 dark:text-red-200">Error:</span><code class="flex-1 bg-red-200 dark:bg-red-900 px-3 py-2 rounded-lg text-sm font-mono">${testCase.error_message}</code></div>` : ''}
+                    </div>
+                </div>`;
+            });
+            html += `</div>`;
+        }
+        
+        if (data.error_message) {
+            html += `<div class="mt-4 p-5 bg-red-100 dark:bg-red-900/30 border-2 border-red-500 rounded-xl">
+                <span class="font-bold text-red-800 dark:text-red-200">Error: </span><span class="text-red-700 dark:text-red-300">${data.error_message}</span>
+            </div>`;
+        }
+        
+        contentDiv.innerHTML = html;
+        resultsDiv.classList.remove('hidden');
+        resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    
+    function showSuccessModal() {
+        document.getElementById('success-modal').classList.remove('hidden');
+    }
+    
+    function closeSuccessModal() {
+        document.getElementById('success-modal').classList.add('hidden');
+    }
+    
+    function showErrorModal() {
+        document.getElementById('error-modal').classList.remove('hidden');
+    }
+    
+    function closeErrorModal() {
+        document.getElementById('error-modal').classList.add('hidden');
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `fixed top-4 right-4 p-4 rounded-xl text-white font-bold z-50 shadow-2xl transform translate-x-0 transition-all ${type === 'error' ? 'bg-gradient-to-r from-red-500 to-pink-600' : 'bg-gradient-to-r from-blue-500 to-indigo-600'}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => { toast.classList.add('translate-x-full'); setTimeout(() => document.body.removeChild(toast), 300); }, 3000);
+    }
+</script>
+{% endblock %}

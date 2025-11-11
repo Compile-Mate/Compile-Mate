@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Review Details - CompileMate{% endblock %}
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8">
+    <div class="max-w-5xl mx-auto px-4">
+        <a href="{% url 'code_reviews:list' %}" class="text-blue-600 dark:text-blue-400 hover:underline mb-6 inline-block">← Back to Reviews</a>
+        
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ review_request.title }}</h1>
+                    <p class="text-gray-600 dark:text-gray-400">Problem: {{ review_request.submission.problem.title }}</p>
+                    <p class="text-sm text-gray-500">Requested by: {{ review_request.requester.username }} • {{ review_request.created_at|timesince }} ago</p>
+                </div>
+                <span class="px-4 py-2 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full font-semibold">{{ review_request.get_status_display }}</span>
+            </div>
+            
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 mb-6">
+                <h3 class="font-bold text-gray-900 dark:text-white mb-2">Description:</h3>
+                <p class="text-gray-700 dark:text-gray-300">{{ review_request.description }}</p>
+            </div>
+            
+            <div class="bg-gray-900 rounded-xl p-6 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-gray-400 text-sm">{{ review_request.submission.language }}</span>
+                    <button onclick="navigator.clipboard.writeText(document.getElementById('code').innerText)" class="text-green-400 hover:text-green-300 text-sm">📋 Copy</button>
+                </div>
+                <pre class="text-gray-100 text-sm overflow-x-auto"><code id="code">{{ review_request.submission.code }}</code></pre>
+            </div>
+            
+            {% if review %}
+            <div class="border-t-2 border-gray-200 dark:border-gray-700 pt-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">✅ Review by {{ review.reviewer.username }}</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="bg-green-50 dark:bg-green-900/20 rounded-xl p-4">
+                        <h3 class="font-bold text-green-800 dark:text-green-300 mb-2">Strengths</h3>
+                        <p class="text-gray-700 dark:text-gray-300 text-sm">{{ review.strengths }}</p>
+                    </div>
+                    <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-4">
+                        <h3 class="font-bold text-yellow-800 dark:text-yellow-300 mb-2">Improvements</h3>
+                        <p class="text-gray-700 dark:text-gray-300 text-sm">{{ review.improvements }}</p>
+                    </div>
+                </div>
+                
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6 mb-4">
+                    <h3 class="font-bold text-gray-900 dark:text-white mb-2">Overall Feedback</h3>
+                    <p class="text-gray-700 dark:text-gray-300 mb-3">{{ review.overall_feedback }}</p>
+                    <div class="flex items-center">
+                        <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Code Quality: </span>
+                        <span class="ml-2 text-xl font-bold text-blue-600">{{ review.code_quality_score }}/10</span>
+                    </div>
+                </div>
+                
+                {% if comments %}
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Line Comments</h3>
+                <div class="space-y-2 mb-4">
+                    {% for comment in comments %}
+                    <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3">
+                        <p class="text-xs text-gray-500 mb-1">Line {{ comment.line_number }}</p>
+                        <p class="text-gray-700 dark:text-gray-300 text-sm">{{ comment.comment }}</p>
+                        {% if comment.suggestion %}
+                        <p class="text-green-600 dark:text-green-400 text-sm mt-1">💡 {{ comment.suggestion }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-6 text-center">
+                <p class="text-gray-700 dark:text-gray-300">⏳ Waiting for a reviewer to provide feedback...</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
