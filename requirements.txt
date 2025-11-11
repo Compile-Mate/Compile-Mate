@@ -103,7 +103,7 @@ black==23.12.1
 autopep8==2.0.4
 
 # Data Validation
-pydantic==2.5.3
+pydantic==2.7.4
 
 # Utility Libraries
 python-slugify==8.0.1
