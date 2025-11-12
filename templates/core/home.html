@@ -315,37 +315,37 @@
             </p>
 
             <!-- CTA Buttons with Advanced Effects -->
-            <div class="flex flex-col sm:flex-row gap-6 justify-center mb-16 scroll-reveal" style="animation-delay: 0.4s;">
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16 scroll-reveal" style="animation-delay: 0.4s;">
                 {% if user.is_authenticated %}
-                    <a href="{% url 'problems:problem_list' %}" class="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white px-12 py-6 rounded-2xl font-black text-xl shadow-2xl hover:shadow-blue-500/50 transform hover:scale-110 transition-all duration-300 advanced-btn magnetic-btn overflow-hidden">
+                    <a href="{% url 'problems:problem_list' %}" class="group relative inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white px-8 py-3 rounded-xl font-bold text-base shadow-2xl hover:shadow-blue-500/50 transform hover:scale-105 transition-all duration-300 advanced-btn magnetic-btn overflow-hidden">
                         <div class="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
-                        <svg class="w-7 h-7 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
                         </svg>
                         <span class="relative z-10">START CODING NOW</span>
-                        <svg class="w-6 h-6 group-hover:translate-x-2 transition-transform relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 group-hover:translate-x-2 transition-transform relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                         </svg>
                     </a>
-                    <a href="{% url 'core:dashboard' %}" class="inline-flex items-center justify-center gap-3 glass-morphism border-2 border-white/40 text-white hover:bg-white hover:text-purple-900 px-12 py-6 rounded-2xl font-black text-xl shadow-2xl transform hover:scale-110 transition-all duration-300 magnetic-btn">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{% url 'core:dashboard' %}" class="inline-flex items-center justify-center gap-2 glass-morphism border-2 border-white/40 text-white hover:bg-white hover:text-purple-900 px-8 py-3 rounded-xl font-bold text-base shadow-2xl transform hover:scale-105 transition-all duration-300 magnetic-btn">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                         </svg>
                         VIEW DASHBOARD
                     </a>
                 {% else %}
-                    <a href="{% url 'account_signup' %}" class="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 hover:from-green-700 hover:via-emerald-700 hover:to-teal-700 text-white px-12 py-6 rounded-2xl font-black text-xl shadow-2xl hover:shadow-green-500/50 transform hover:scale-110 transition-all duration-300 advanced-btn magnetic-btn overflow-hidden">
+                    <a href="{% url 'account_signup' %}" class="group relative inline-flex items-center justify-center gap-2 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 hover:from-green-700 hover:via-emerald-700 hover:to-teal-700 text-white px-8 py-3 rounded-xl font-bold text-base shadow-2xl hover:shadow-green-500/50 transform hover:scale-105 transition-all duration-300 advanced-btn magnetic-btn overflow-hidden">
                         <div class="absolute inset-0 bg-gradient-to-r from-green-400 to-teal-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
-                        <svg class="w-7 h-7 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                         </svg>
                         <span class="relative z-10">GET STARTED FREE</span>
-                        <svg class="w-6 h-6 group-hover:translate-x-2 transition-transform relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 group-hover:translate-x-2 transition-transform relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                         </svg>
                     </a>
-                    <a href="{% url 'account_login' %}" class="inline-flex items-center justify-center gap-3 glass-morphism border-2 border-white/40 text-white hover:bg-white hover:text-purple-900 px-12 py-6 rounded-2xl font-black text-xl shadow-2xl transform hover:scale-110 transition-all duration-300 magnetic-btn">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{% url 'account_login' %}" class="inline-flex items-center justify-center gap-2 glass-morphism border-2 border-white/40 text-white hover:bg-white hover:text-purple-900 px-8 py-3 rounded-xl font-bold text-base shadow-2xl transform hover:scale-105 transition-all duration-300 magnetic-btn">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
                         </svg>
                         SIGN IN
@@ -375,16 +375,6 @@
                     <span>Active Community</span>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Scroll Indicator with Animation -->
-    <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce z-10">
-        <div class="flex flex-col items-center gap-2">
-            <span class="text-white/60 text-sm font-semibold">Scroll to explore</span>
-            <svg class="w-10 h-10 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
-            </svg>
         </div>
     </div>
 </div>
